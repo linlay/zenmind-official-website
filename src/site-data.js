@@ -30,53 +30,68 @@ export const routeMap = {
   },
 };
 
-export const installEntries = [
+export const desktopInstallers = [
   {
     key: 'mac',
     name: 'macOS',
-    command: 'curl -fsSL https://www.zenmind.cc/install/mac.sh | bash',
-    docsHref: deployRepoUrl,
+    href: '/downloads/ZenMind-0.2.3-arm64.dmg',
+    available: true,
+    version: '0.2.3',
     zh: {
       label: 'macOS',
-      summary: '适合个人开发者的桌面入口',
-      requirement: 'Docker Desktop',
+      button: '下载 macOS 版',
+      summary: '适用于 Apple Silicon Mac 的 DMG 安装包',
+      meta: ['DMG 安装包', 'arm64', '约 160 MB'],
+      note: '打开 .dmg 后将 ZenMind 拖入“应用程序”文件夹。',
     },
     en: {
       label: 'macOS',
-      summary: 'Desktop entry for individual developers',
-      requirement: 'Docker Desktop',
+      button: 'Download for macOS',
+      summary: 'DMG installer for Apple Silicon Macs.',
+      meta: ['DMG installer', 'arm64', 'about 160 MB'],
+      note: 'Open the .dmg and drag ZenMind into Applications.',
+    },
+  },
+  {
+    key: 'windows',
+    name: 'Windows',
+    href: '/downloads/ZenMind-0.2.3-x64.exe',
+    available: true,
+    version: '0.2.3',
+    zh: {
+      label: 'Windows',
+      button: '下载 Windows 版',
+      summary: '适用于 Windows x64 的 NSIS 安装包',
+      meta: ['NSIS 安装包', 'x64', '保留用户数据卸载'],
+      note: '运行安装包并按提示完成安装。',
+    },
+    en: {
+      label: 'Windows',
+      button: 'Download for Windows',
+      summary: 'NSIS installer for Windows x64.',
+      meta: ['NSIS installer', 'x64', 'data-safe uninstall'],
+      note: 'Run the installer and follow the setup guide.',
     },
   },
   {
     key: 'linux',
     name: 'Linux',
-    command: 'curl -fsSL https://www.zenmind.cc/install/linux.sh | bash',
-    docsHref: deployRepoUrl,
+    href: null,
+    available: false,
+    version: null,
     zh: {
       label: 'Linux',
-      summary: '适合服务器与长期运行环境',
-      requirement: 'Docker Engine + Compose',
+      button: 'Linux 版暂未开放',
+      summary: 'Desktop 安装包暂未提供 Linux 版本',
+      meta: ['Desktop 包规划中', '可查看文档', '可访问源码'],
+      note: '当前 Desktop 打包目标为 macOS DMG 与 Windows NSIS。',
     },
     en: {
       label: 'Linux',
-      summary: 'For servers and long-running workspaces',
-      requirement: 'Docker Engine + Compose',
-    },
-  },
-  {
-    key: 'windows',
-    name: 'Windows (WSL)',
-    command: 'curl -fsSL https://www.zenmind.cc/install/win-wsl.sh | bash',
-    docsHref: deployRepoUrl,
-    zh: {
-      label: 'Windows',
-      summary: '通过 WSL 进入 Linux Shell 安装',
-      requirement: 'WSL 2 + Docker Desktop',
-    },
-    en: {
-      label: 'Windows',
-      summary: 'Install from a Linux shell through WSL',
-      requirement: 'WSL 2 + Docker Desktop',
+      button: 'Linux build not available yet',
+      summary: 'A Linux Desktop installer is not available yet.',
+      meta: ['Desktop package planned', 'docs available', 'source available'],
+      note: 'Current Desktop packaging targets are macOS DMG and Windows NSIS.',
     },
   },
 ];
@@ -116,17 +131,22 @@ export const languages = {
       statusSoon: '规划中',
       statusPreview: '预览',
       externalLabel: '打开外链',
+      downloadFallback: '查看文档',
     },
     home: {
       eyebrow: 'Desktop-first AI Agent Platform',
       headline: '把家里的电脑\n变成 AI Agent 工作站',
       subtitle:
         'ZenMind 以 Desktop 为入口，把本地服务、Web 客户端、移动端方向、国产模型生态和本地沙箱串成同一套 Agent 体验。',
-      installTitle: '先安装，再进入工作台',
-      installBody: '选择你的平台，复制命令，在终端中启动 ZenMind Desktop 与核心服务。',
+      installTitle: '下载 ZenMind Desktop',
+      installBody: '我们会根据你的环境推荐安装包，也可以手动切换 macOS 或 Windows 版本。',
       primaryCta: '查看文档',
       secondaryCta: '源代码',
-      commandCaption: '官方安装入口',
+      commandCaption: 'Desktop 安装包',
+      downloadDetected: '已根据当前环境推荐',
+      downloadManual: '选择其他平台',
+      downloadUnavailableTitle: '当前环境暂未提供 Desktop 安装包',
+      downloadUnavailableBody: '你仍然可以查看文档或源码，了解 ZenMind Desktop、核心服务和本地沙箱的运行方式。',
       heroStats: [
         { value: 'Desktop', label: '统一安装、启动、监控' },
         { value: 'AGW UI', label: '流式输出、HITL、viewport' },
@@ -140,9 +160,9 @@ export const languages = {
         'container-hub: sandbox session prepared',
       ],
       featuresEyebrow: '核心功能',
-      featuresTitle: '滚轮向下，是 ZenMind 的完整工作流',
+      featuresTitle: '更高效完成工作',
       featuresIntro:
-        '不是单一聊天窗口，而是一套从桌面控制中心到本地沙箱、模型注册、交互协议的 Agent 平台。',
+        '把真实工作材料交给 ZenMind：服务、模型、工具环境、交互视图和跨端入口都在同一套 Agent 工作流里协同。',
       featureSections: [
         {
           key: 'desktop',
@@ -150,6 +170,8 @@ export const languages = {
           body:
             'ZenMind Desktop 负责安装、初始化、启动、停止、服务健康监控和嵌入式 Web 表面，让用户从一个控制中心进入所有能力。',
           points: ['服务生命周期', '日志与设置', '身份令牌桥接'],
+          visualTitle: 'Desktop 控制中心',
+          visualRows: ['安装内置服务', '启动 Agent 运行时', '查看日志与健康状态'],
         },
         {
           key: 'models',
@@ -157,6 +179,8 @@ export const languages = {
           body:
             '优先支持 DeepSeek V4、MiMo、MiniMax M3、Qwen/百炼等模型方向，并保留 provider registry、模型能力和用量字段的扩展空间。',
           points: ['模型切换', 'reasoning 与 vision 标记', 'token/cache/cost usage'],
+          visualTitle: '模型运行时注册表',
+          visualRows: ['DeepSeek V4', 'MiMo', 'MiniMax M3', 'Qwen / Bailian'],
         },
         {
           key: 'agw',
@@ -164,6 +188,8 @@ export const languages = {
           body:
             'AGW UI 结合 HTTP、SSE 与可选 WebSocket，支持流式输出、attach 续接、HITL、交互视图、usage 快照和子智能体调用。',
           points: ['H2A streaming', 'question / approval / form / plan', 'agent_invoke'],
+          visualTitle: 'AGW UI 事件流',
+          visualRows: ['流式增量输出', '等待人工确认', '渲染交互视图', '记录用量快照'],
         },
         {
           key: 'sandbox',
@@ -171,6 +197,8 @@ export const languages = {
           body:
             'agent-container-hub 提供本地沙箱会话、环境模板和容器工具运行时，为文档、表格、PDF、PPT 等办公自动化保留稳定执行层。',
           points: ['长生命周期会话', '工具环境模板', 'Office 技能链路'],
+          visualTitle: '本地沙箱',
+          visualRows: ['容器会话', '工具运行时', 'DOCX / XLSX / PDF / PPT'],
         },
         {
           key: 'clients',
@@ -178,10 +206,12 @@ export const languages = {
           body:
             'Desktop 是入口，Web Client 渲染对话、Timeline、模型切换和 viewport；移动端方向复用同一 AGW UI 协议，而不是另起一套契约。',
           points: ['Desktop first', 'Web timeline', 'Mobile direction'],
+          visualTitle: '同一套 Agent 契约',
+          visualRows: ['Desktop 入口', 'Web Client', '移动端方向'],
         },
       ],
-      finalCtaTitle: '从安装入口进入 ZenMind',
-      finalCtaBody: '官网只负责展示与引导；安装脚本、发布产物和部署编排仍由 zenmind-deploy 维护。',
+      finalCtaTitle: '从 Desktop 进入 ZenMind',
+      finalCtaBody: '官网声明公开下载入口；实际安装包、发布产物和部署编排由发布流程提供。',
       footerTagline: 'Desktop-first AI Agent platform for local, web, and mobile workflows.',
     },
     documents: {
@@ -319,17 +349,22 @@ export const languages = {
       statusSoon: 'Planned',
       statusPreview: 'Preview',
       externalLabel: 'Open external link',
+      downloadFallback: 'Read docs',
     },
     home: {
       eyebrow: 'Desktop-first AI Agent Platform',
       headline: 'Turn your home computer\ninto an AI agent workstation',
       subtitle:
         'ZenMind starts from Desktop and connects local services, web clients, mobile direction, Chinese model ecosystems, and local sandboxes into one agent experience.',
-      installTitle: 'Install first, then open the workspace',
-      installBody: 'Pick your platform, copy the command, and start ZenMind Desktop with the core services.',
+      installTitle: 'Download ZenMind Desktop',
+      installBody: 'We recommend an installer from your environment. You can also switch manually between macOS and Windows.',
       primaryCta: 'Read docs',
       secondaryCta: 'Source code',
-      commandCaption: 'Official install entry',
+      commandCaption: 'Desktop installer',
+      downloadDetected: 'Recommended for this environment',
+      downloadManual: 'Choose another platform',
+      downloadUnavailableTitle: 'No Desktop installer for this environment yet',
+      downloadUnavailableBody: 'You can still read the docs or browse the source to understand ZenMind Desktop, core services, and local sandboxing.',
       heroStats: [
         { value: 'Desktop', label: 'Install, start, and monitor' },
         { value: 'AGW UI', label: 'Streaming, HITL, viewport' },
@@ -343,9 +378,9 @@ export const languages = {
         'container-hub: sandbox session prepared',
       ],
       featuresEyebrow: 'Core features',
-      featuresTitle: 'Scroll into the ZenMind workflow',
+      featuresTitle: 'Get work done faster',
       featuresIntro:
-        'ZenMind is not a single chat window. It is an agent platform that spans Desktop control, local sandboxing, model registry, and an interaction protocol.',
+        'Give ZenMind the real materials behind your work: services, models, tool environments, interactive views, and cross-client entry points cooperate in one agent workflow.',
       featureSections: [
         {
           key: 'desktop',
@@ -353,6 +388,8 @@ export const languages = {
           body:
             'ZenMind Desktop installs, initializes, starts, stops, monitors service health, and embeds web surfaces so users enter every capability from one control center.',
           points: ['Service lifecycle', 'Logs and settings', 'Token bridge'],
+          visualTitle: 'Desktop Control Center',
+          visualRows: ['Install bundled services', 'Start agent runtime', 'Watch logs and health'],
         },
         {
           key: 'models',
@@ -360,6 +397,8 @@ export const languages = {
           body:
             'ZenMind prioritizes DeepSeek V4, MiMo, MiniMax M3, Qwen/Bailian, and keeps providers, model capabilities, and usage fields extensible.',
           points: ['Model switching', 'Reasoning and vision flags', 'token/cache/cost usage'],
+          visualTitle: 'Model Registry',
+          visualRows: ['DeepSeek V4', 'MiMo', 'MiniMax M3', 'Qwen / Bailian'],
         },
         {
           key: 'agw',
@@ -367,6 +406,8 @@ export const languages = {
           body:
             'AGW UI combines HTTP, SSE, and optional WebSocket transport for streaming output, attach recovery, HITL, viewports, usage snapshots, and sub-agent invocation.',
           points: ['H2A streaming', 'question / approval / form / plan', 'agent_invoke'],
+          visualTitle: 'AGW UI Stream',
+          visualRows: ['stream delta', 'await approval', 'render viewport', 'usage snapshot'],
         },
         {
           key: 'sandbox',
@@ -374,6 +415,8 @@ export const languages = {
           body:
             'agent-container-hub provides local sandbox sessions, environment templates, and container-backed tool runtimes for documents, sheets, PDFs, and slides.',
           points: ['Long-lived sessions', 'Tool environment templates', 'Office skill paths'],
+          visualTitle: 'Local Sandbox',
+          visualRows: ['container session', 'tool runtime', 'DOCX / XLSX / PDF / PPT'],
         },
         {
           key: 'clients',
@@ -381,11 +424,13 @@ export const languages = {
           body:
             'Desktop is the entry point. Web Client renders chat, timeline, model switching, and viewports. Mobile direction reuses AGW UI instead of a separate agent contract.',
           points: ['Desktop first', 'Web timeline', 'Mobile direction'],
+          visualTitle: 'One Agent Contract',
+          visualRows: ['Desktop', 'Web Client', 'Mobile direction'],
         },
       ],
-      finalCtaTitle: 'Start from the ZenMind install entry',
+      finalCtaTitle: 'Start from ZenMind Desktop',
       finalCtaBody:
-        'This website only presents and routes. Install scripts, release artifacts, and deployment orchestration remain in zenmind-deploy.',
+        'This website declares public download entries. Installer files, release artifacts, and deployment orchestration are supplied by the release pipeline.',
       footerTagline: 'Desktop-first AI Agent platform for local, web, and mobile workflows.',
     },
     documents: {

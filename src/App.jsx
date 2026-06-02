@@ -1,11 +1,60 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { externalLinks, githubUrl, installEntries, languages, routeMap, siteUrl } from './site-data';
+import { desktopInstallers, externalLinks, githubUrl, languages, routeMap, siteUrl } from './site-data';
 
 const pageOrder = ['home', 'documents', 'news', 'market'];
 const routeOrder = ['home', 'documents', 'news', 'market', 'login'];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
+const supportedPlatforms = ['mac', 'windows', 'linux', 'unknown'];
+
+function normalizePlatform(value) {
+  const source = String(value || '').toLowerCase();
+
+  if (source.includes('mac') || source.includes('darwin')) {
+    return 'mac';
+  }
+
+  if (source.includes('win')) {
+    return 'windows';
+  }
+
+  if (source.includes('linux')) {
+    return 'linux';
+  }
+
+  if (source.includes('unknown') || source.includes('other')) {
+    return 'unknown';
+  }
+
+  return null;
+}
+
+function detectDesktopPlatform() {
+  const params = new URLSearchParams(window.location.search);
+  const platformOverride = params.get('platform') || window.__ZENMIND_PLATFORM_OVERRIDE__;
+  if (platformOverride) {
+    return normalizePlatform(platformOverride) || 'unknown';
+  }
+
+  const userAgentDataPlatform = navigator.userAgentData?.platform;
+  const platform = normalizePlatform(userAgentDataPlatform || navigator.platform);
+  if (platform) {
+    return platform;
+  }
+
+  return normalizePlatform(navigator.userAgent) || 'mac';
+}
+
+function useDetectedDesktopPlatform() {
+  const [platform, setPlatform] = useState('mac');
+
+  useEffect(() => {
+    setPlatform(detectDesktopPlatform());
+  }, []);
+
+  return platform;
+}
 
 function resolveTheme(mode) {
   if (mode === 'light' || mode === 'dark') {
@@ -215,6 +264,13 @@ function Icon({ type }) {
       </>
     ),
     arrow: <path d="M5 12h14m-5-5 5 5-5 5" />,
+    download: (
+      <>
+        <path d="M12 3v11" />
+        <path d="m7 9 5 5 5-5" />
+        <path d="M5 21h14" />
+      </>
+    ),
   };
 
   return (
@@ -357,55 +413,122 @@ function Header({ lang, pageKey, theme }) {
   );
 }
 
-function InstallSwitcher({ lang }) {
-  const [activeKey, setActiveKey] = useState(installEntries[0].key);
-  const activeEntry = installEntries.find((entry) => entry.key === activeKey) || installEntries[0];
+function DesktopDownload({ lang }) {
+  const detectedPlatform = useDetectedDesktopPlatform();
+  const [selectedKey, setSelectedKey] = useState('mac');
   const copy = languages[lang];
 
+  useEffect(() => {
+    setSelectedKey(supportedPlatforms.includes(detectedPlatform) ? detectedPlatform : 'mac');
+  }, [detectedPlatform]);
+
+  const linuxFallback = desktopInstallers.find((entry) => entry.key === 'linux');
+  const unknownInstaller = {
+    key: 'unknown',
+    name: 'Unknown',
+    href: null,
+    available: false,
+    [lang]: {
+      label: copy.home.downloadUnavailableTitle,
+      button: copy.home.downloadUnavailableTitle,
+      summary: copy.home.downloadUnavailableBody,
+      meta: linuxFallback[lang].meta,
+      note: linuxFallback[lang].note,
+    },
+  };
+  const selectedInstaller = desktopInstallers.find((entry) => entry.key === selectedKey) || unknownInstaller;
+  const availableInstallers = desktopInstallers.filter((entry) => entry.available);
+  const localized = selectedInstaller[lang];
+  const isDetected = selectedInstaller.key === detectedPlatform;
+
   return (
-    <div className="install-switcher" data-reveal>
-      <div className="install-tabs" role="tablist" aria-label={copy.home.commandCaption}>
-        {installEntries.map((entry) => {
-          const localized = entry[lang];
-          const selected = entry.key === activeKey;
-
-          return (
-            <button
-              key={entry.key}
-              className={`install-tab${selected ? ' is-active' : ''}`}
-              type="button"
-              role="tab"
-              id={`install-tab-${entry.key}`}
-              aria-controls={`install-panel-${entry.key}`}
-              aria-selected={selected}
-              onClick={() => setActiveKey(entry.key)}
-            >
-              <span>{localized.label}</span>
-              <small>{localized.requirement}</small>
-            </button>
-          );
-        })}
+    <div className="download-panel" data-reveal>
+      <div className="download-panel-copy">
+        <p className="eyebrow">{copy.home.commandCaption}</p>
+        <h2>{copy.home.installTitle}</h2>
+        <p>{copy.home.installBody}</p>
       </div>
 
-      <div
-        className="install-command"
-        id={`install-panel-${activeEntry.key}`}
-        role="tabpanel"
-        aria-labelledby={`install-tab-${activeEntry.key}`}
-      >
-        <div>
-          <p>{copy.home.commandCaption}</p>
-          <code>{activeEntry.command}</code>
+      <div className={`download-card${selectedInstaller.available ? '' : ' is-unavailable'}`}>
+        <div className="download-card-top">
+          <img className="download-logo" src="/zenmind-logo.svg" alt="" />
+          <div>
+            <p className="download-kicker">{isDetected ? copy.home.downloadDetected : copy.home.downloadManual}</p>
+            <h3>{localized.button}</h3>
+            <p>{localized.summary}</p>
+          </div>
         </div>
-        <CopyButton text={activeEntry.command} lang={lang} />
+
+        {selectedInstaller.available ? (
+          <a className="download-primary" href={selectedInstaller.href} download>
+            <Icon type="download" />
+            <span>{localized.button}</span>
+          </a>
+        ) : (
+          <div className="download-unavailable">
+            <strong>{copy.home.downloadUnavailableTitle}</strong>
+            <p>{copy.home.downloadUnavailableBody}</p>
+            <div className="download-fallbacks">
+              <Link className="button button-primary" to={pathFor(lang, 'documents')}>
+                <span>{copy.shared.downloadFallback}</span>
+                <Icon type="arrow" />
+              </Link>
+              <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
+                <span>{copy.shared.openGithub}</span>
+                <Icon type="external" />
+              </a>
+            </div>
+          </div>
+        )}
+
+        <div className="download-meta">
+          {localized.meta.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+        <p className="download-note">{localized.note}</p>
       </div>
 
-      <div className="install-platforms">
-        {installEntries.map((entry) => (
-          <article className={entry.key === activeKey ? 'is-active' : ''} key={entry.key}>
-            <strong>{entry.name}</strong>
+      <div className="download-choices" aria-label={copy.home.downloadManual}>
+        {availableInstallers.map((entry) => (
+          <button
+            className={`download-choice${selectedKey === entry.key ? ' is-active' : ''}`}
+            key={entry.key}
+            type="button"
+            aria-pressed={selectedKey === entry.key}
+            onClick={() => setSelectedKey(entry.key)}
+          >
+            <strong>{entry[lang].label}</strong>
             <span>{entry[lang].summary}</span>
-          </article>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FeatureVisual({ feature }) {
+  return (
+    <div className={`feature-visual feature-visual-${feature.key}`}>
+      <div className="visual-window">
+        <div className="visual-window-top">
+          <span />
+          <span />
+          <span />
+          <strong>{feature.visualTitle}</strong>
+        </div>
+        <div className="visual-window-body">
+          {feature.visualRows.map((row, index) => (
+            <div className="visual-row" key={row}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{row}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="visual-mini-grid">
+        {feature.points.map((point) => (
+          <span key={point}>{point}</span>
         ))}
       </div>
     </div>
@@ -454,37 +577,27 @@ function FeatureStory({ lang }) {
 
   return (
     <section className="feature-story">
-      <div className="section-heading" data-reveal>
+      <div className="section-heading feature-heading" data-reveal>
         <p className="eyebrow">{copy.featuresEyebrow}</p>
         <h2>{copy.featuresTitle}</h2>
         <p>{copy.featuresIntro}</p>
       </div>
 
-      <div className="story-grid">
-        <div className="story-visual" data-reveal>
-          <img src="/zenmind-architecture.svg" alt="ZenMind Desktop architecture" />
-          <div className="protocol-strip">
-            <span>Desktop</span>
-            <span>AGW UI</span>
-            <span>Sandbox</span>
+      {copy.featureSections.map((feature, index) => (
+        <article className={`feature-row${index % 2 === 1 ? ' is-reversed' : ''}`} key={feature.key} data-reveal>
+          <FeatureVisual feature={feature} />
+          <div className="feature-copy">
+            <span className="story-index">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{feature.title}</h3>
+            <p>{feature.body}</p>
+            <ul>
+              {feature.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
           </div>
-        </div>
-
-        <div className="story-sections">
-          {copy.featureSections.map((feature, index) => (
-            <article className="story-card" key={feature.key} data-reveal>
-              <span className="story-index">{String(index + 1).padStart(2, '0')}</span>
-              <h3>{feature.title}</h3>
-              <p>{feature.body}</p>
-              <ul>
-                {feature.points.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-      </div>
+        </article>
+      ))}
     </section>
   );
 }
@@ -501,7 +614,7 @@ function HomePage({ lang }) {
           <p className="hero-subtitle">{copy.home.subtitle}</p>
         </div>
 
-        <InstallSwitcher lang={lang} />
+        <DesktopDownload lang={lang} />
 
         <div className="hero-actions" data-reveal>
           <ButtonLink href={pathFor(lang, 'documents')} label={copy.home.primaryCta} />
