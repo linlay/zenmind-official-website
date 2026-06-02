@@ -6,7 +6,6 @@ const pageOrder = ['home', 'documents', 'news', 'market'];
 const routeOrder = ['home', 'documents', 'news', 'market', 'login'];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
-const supportedPlatforms = ['mac', 'windows', 'linux', 'unknown'];
 
 function normalizePlatform(value) {
   const source = String(value || '').toLowerCase();
@@ -415,13 +414,7 @@ function Header({ lang, pageKey, theme }) {
 
 function DesktopDownload({ lang }) {
   const detectedPlatform = useDetectedDesktopPlatform();
-  const [selectedKey, setSelectedKey] = useState('mac');
   const copy = languages[lang];
-
-  useEffect(() => {
-    setSelectedKey(supportedPlatforms.includes(detectedPlatform) ? detectedPlatform : 'mac');
-  }, [detectedPlatform]);
-
   const linuxFallback = desktopInstallers.find((entry) => entry.key === 'linux');
   const unknownInstaller = {
     key: 'unknown',
@@ -436,73 +429,31 @@ function DesktopDownload({ lang }) {
       note: linuxFallback[lang].note,
     },
   };
-  const selectedInstaller = desktopInstallers.find((entry) => entry.key === selectedKey) || unknownInstaller;
-  const availableInstallers = desktopInstallers.filter((entry) => entry.available);
+  const selectedInstaller = desktopInstallers.find((entry) => entry.key === detectedPlatform) || unknownInstaller;
   const localized = selectedInstaller[lang];
-  const isDetected = selectedInstaller.key === detectedPlatform;
 
   return (
-    <div className="download-panel" data-reveal>
-      <div className="download-panel-copy">
-        <p className="eyebrow">{copy.home.commandCaption}</p>
-        <h2>{copy.home.installTitle}</h2>
-        <p>{copy.home.installBody}</p>
-      </div>
-
-      <div className={`download-card${selectedInstaller.available ? '' : ' is-unavailable'}`}>
-        <div className="download-card-top">
-          <img className="download-logo" src="/zenmind-logo.svg" alt="" />
-          <div>
-            <p className="download-kicker">{isDetected ? copy.home.downloadDetected : copy.home.downloadManual}</p>
-            <h3>{localized.button}</h3>
-            <p>{localized.summary}</p>
+    <div className={`download-panel${selectedInstaller.available ? '' : ' is-unavailable'}`} data-reveal>
+      {selectedInstaller.available ? (
+        <a className="download-primary" href={selectedInstaller.href} download>
+          <Icon type="download" />
+          <span>{localized.button}</span>
+        </a>
+      ) : (
+        <div className="download-unavailable">
+          <strong>{copy.home.downloadUnavailableTitle}</strong>
+          <div className="download-fallbacks">
+            <Link className="button button-primary" to={pathFor(lang, 'documents')}>
+              <span>{copy.shared.downloadFallback}</span>
+              <Icon type="arrow" />
+            </Link>
+            <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
+              <span>{copy.shared.openGithub}</span>
+              <Icon type="external" />
+            </a>
           </div>
         </div>
-
-        {selectedInstaller.available ? (
-          <a className="download-primary" href={selectedInstaller.href} download>
-            <Icon type="download" />
-            <span>{localized.button}</span>
-          </a>
-        ) : (
-          <div className="download-unavailable">
-            <strong>{copy.home.downloadUnavailableTitle}</strong>
-            <p>{copy.home.downloadUnavailableBody}</p>
-            <div className="download-fallbacks">
-              <Link className="button button-primary" to={pathFor(lang, 'documents')}>
-                <span>{copy.shared.downloadFallback}</span>
-                <Icon type="arrow" />
-              </Link>
-              <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
-                <span>{copy.shared.openGithub}</span>
-                <Icon type="external" />
-              </a>
-            </div>
-          </div>
-        )}
-
-        <div className="download-meta">
-          {localized.meta.map((item) => (
-            <span key={item}>{item}</span>
-          ))}
-        </div>
-        <p className="download-note">{localized.note}</p>
-      </div>
-
-      <div className="download-choices" aria-label={copy.home.downloadManual}>
-        {availableInstallers.map((entry) => (
-          <button
-            className={`download-choice${selectedKey === entry.key ? ' is-active' : ''}`}
-            key={entry.key}
-            type="button"
-            aria-pressed={selectedKey === entry.key}
-            onClick={() => setSelectedKey(entry.key)}
-          >
-            <strong>{entry[lang].label}</strong>
-            <span>{entry[lang].summary}</span>
-          </button>
-        ))}
-      </div>
+      )}
     </div>
   );
 }
@@ -609,9 +560,8 @@ function HomePage({ lang }) {
     <>
       <section className="hero">
         <div className="hero-copy" data-reveal>
-          <p className="eyebrow">{copy.home.eyebrow}</p>
+          <img className="hero-logo" src="/zenmind-logo.svg" alt="" />
           <h1>{copy.home.headline}</h1>
-          <p className="hero-subtitle">{copy.home.subtitle}</p>
         </div>
 
         <DesktopDownload lang={lang} />

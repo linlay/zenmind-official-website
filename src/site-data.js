@@ -135,16 +135,9 @@ export const languages = {
     },
     home: {
       eyebrow: 'Desktop-first AI Agent Platform',
-      headline: '把家里的电脑\n变成 AI Agent 工作站',
-      subtitle:
-        'ZenMind 以 Desktop 为入口，把本地服务、Web 客户端、移动端方向、国产模型生态和本地沙箱串成同一套 Agent 体验。',
-      installTitle: '下载 ZenMind Desktop',
-      installBody: '我们会根据你的环境推荐安装包，也可以手动切换 macOS 或 Windows 版本。',
+      headline: '让你的电脑\n变为智能体工作站',
       primaryCta: '查看文档',
       secondaryCta: '源代码',
-      commandCaption: 'Desktop 安装包',
-      downloadDetected: '已根据当前环境推荐',
-      downloadManual: '选择其他平台',
       downloadUnavailableTitle: '当前环境暂未提供 Desktop 安装包',
       downloadUnavailableBody: '你仍然可以查看文档或源码，了解 ZenMind Desktop、核心服务和本地沙箱的运行方式。',
       heroStats: [
@@ -353,16 +346,9 @@ export const languages = {
     },
     home: {
       eyebrow: 'Desktop-first AI Agent Platform',
-      headline: 'Turn your home computer\ninto an AI agent workstation',
-      subtitle:
-        'ZenMind starts from Desktop and connects local services, web clients, mobile direction, Chinese model ecosystems, and local sandboxes into one agent experience.',
-      installTitle: 'Download ZenMind Desktop',
-      installBody: 'We recommend an installer from your environment. You can also switch manually between macOS and Windows.',
+      headline: 'Turn your computer\ninto an agent workstation',
       primaryCta: 'Read docs',
       secondaryCta: 'Source code',
-      commandCaption: 'Desktop installer',
-      downloadDetected: 'Recommended for this environment',
-      downloadManual: 'Choose another platform',
       downloadUnavailableTitle: 'No Desktop installer for this environment yet',
       downloadUnavailableBody: 'You can still read the docs or browse the source to understand ZenMind Desktop, core services, and local sandboxing.',
       heroStats: [
