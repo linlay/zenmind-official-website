@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## 1. 项目概览
 
@@ -54,7 +54,7 @@
 ```text
 zenmind-website/
   README.md
-  CLAUDE.md
+  AGENTS.md
   package.json
   vite.config.js
   index.html

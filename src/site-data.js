@@ -1,25 +1,32 @@
 const siteUrl = 'https://www.zenmind.cc';
 const githubUrl = 'https://github.com/linlay/zenmind';
 const deployRepoUrl = 'https://github.com/linlay/zenmind-deploy';
+const docsBaseUrl = 'https://github.com/linlay/zenmind/blob/main/docs';
 
 export const externalLinks = {
   github: githubUrl,
   deployDocs: deployRepoUrl,
   deployRepo: deployRepoUrl,
+  architecture: `${docsBaseUrl}/architecture.md`,
+  agwui: `${docsBaseUrl}/agwui.md`,
+  models: `${docsBaseUrl}/models.md`,
+  mobile: `${docsBaseUrl}/mobile.md`,
 };
 
 export const routeMap = {
   zh: {
     home: '/',
-    download: '/download',
-    faq: '/faq',
-    privacy: '/privacy',
+    documents: '/documents',
+    news: '/news',
+    market: '/market',
+    login: '/login',
   },
   en: {
     home: '/en',
-    download: '/en/download',
-    faq: '/en/faq',
-    privacy: '/en/privacy',
+    documents: '/en/documents',
+    news: '/en/news',
+    market: '/en/market',
+    login: '/en/login',
   },
 };
 
@@ -30,18 +37,14 @@ export const installEntries = [
     command: 'curl -fsSL https://www.zenmind.cc/install/mac.sh | bash',
     docsHref: deployRepoUrl,
     zh: {
-      summary: '推荐个人开发者使用',
-      notes: [
-        '需要 Docker Desktop 运行环境。',
-        '首次执行进入引导安装，后续使用同一命令即可升级。',
-      ],
+      label: 'macOS',
+      summary: '适合个人开发者的桌面入口',
+      requirement: 'Docker Desktop',
     },
     en: {
-      summary: 'Recommended for individual developers.',
-      notes: [
-        'Requires Docker Desktop.',
-        'The first run launches guided setup, and the same command can be used for upgrades later.',
-      ],
+      label: 'macOS',
+      summary: 'Desktop entry for individual developers',
+      requirement: 'Docker Desktop',
     },
   },
   {
@@ -50,18 +53,14 @@ export const installEntries = [
     command: 'curl -fsSL https://www.zenmind.cc/install/linux.sh | bash',
     docsHref: deployRepoUrl,
     zh: {
+      label: 'Linux',
       summary: '适合服务器与长期运行环境',
-      notes: [
-        '需要 Docker Engine 与 Docker Compose。',
-        '支持 Ubuntu、Debian、CentOS 等主流发行版。',
-      ],
+      requirement: 'Docker Engine + Compose',
     },
     en: {
-      summary: 'Great for servers and long-running environments.',
-      notes: [
-        'Requires Docker Engine and Docker Compose.',
-        'Supports mainstream distributions such as Ubuntu, Debian, and CentOS.',
-      ],
+      label: 'Linux',
+      summary: 'For servers and long-running workspaces',
+      requirement: 'Docker Engine + Compose',
     },
   },
   {
@@ -70,18 +69,14 @@ export const installEntries = [
     command: 'curl -fsSL https://www.zenmind.cc/install/win-wsl.sh | bash',
     docsHref: deployRepoUrl,
     zh: {
-      summary: '通过 WSL 运行，需先进入 Linux Shell',
-      notes: [
-        '需安装 WSL 2 与 Docker Desktop。',
-        '请在 WSL 终端中执行安装命令。',
-      ],
+      label: 'Windows',
+      summary: '通过 WSL 进入 Linux Shell 安装',
+      requirement: 'WSL 2 + Docker Desktop',
     },
     en: {
-      summary: 'Runs through WSL and starts from a Linux shell.',
-      notes: [
-        'Requires WSL 2 and Docker Desktop.',
-        'Run the install command inside your WSL terminal.',
-      ],
+      label: 'Windows',
+      summary: 'Install from a Linux shell through WSL',
+      requirement: 'WSL 2 + Docker Desktop',
     },
   },
 ];
@@ -92,142 +87,202 @@ export const languages = {
     switchLabel: 'EN',
     brandMark: 'ZenMind',
     seo: {
-      title: 'ZenMind | 私有部署的一站式 AI 助理平台',
-      description: 'ZenMind 是面向个人与团队的私有化 AI 助理平台，支持一键部署，数据完全自主可控。',
+      title: 'ZenMind | Desktop-first AI Agent 平台',
+      description:
+        'ZenMind 是以 Desktop 为入口的 AI Agent 平台，连接本地服务、Web/移动端工作流、国产模型生态与本地沙箱。',
       url: siteUrl,
     },
     nav: {
       home: '首页',
-      download: '下载',
-      faq: 'FAQ',
-      privacy: '隐私',
+      documents: '文档',
+      news: '新闻',
+      market: '市场',
+      login: '登录',
       github: 'GitHub',
     },
-    shared: {
-      installKicker: '安装',
-      deployDocs: '安装文档',
-      deployRepo: '部署仓库',
-      sourceRepo: 'GitHub 仓库',
-      openDocs: '查看文档',
-      copyLabel: '复制命令',
-      copiedLabel: '已复制',
+    theme: {
+      label: '主题',
+      auto: '自动',
+      light: '白天',
+      dark: '黑夜',
     },
-    kickers: {
-      features: '核心价值',
-      quickStart: '快速开始',
-      next: '下一步',
-      download: '下载',
-      faq: 'FAQ',
-      privacy: '隐私',
+    shared: {
+      copyLabel: '复制',
+      copiedLabel: '已复制',
+      openGithub: 'GitHub',
+      readDocs: '阅读文档',
+      deployDocs: '部署入口',
+      statusReady: '可用',
+      statusSoon: '规划中',
+      statusPreview: '预览',
+      externalLabel: '打开外链',
     },
     home: {
-      eyebrow: 'Self-Hosted AI Platform',
-      headline: '你的 AI 助理\n由你掌控',
+      eyebrow: 'Desktop-first AI Agent Platform',
+      headline: '把家里的电脑\n变成 AI Agent 工作站',
       subtitle:
-        '一站式私有部署平台，将终端、Web 与智能服务整合为统一工作台。部署简单，数据自主，适合个人开发者与小型团队。',
-      primaryCta: '开始安装',
-      secondaryCta: 'GitHub',
-      installTitle: '选择平台，一键安装',
-      installBody: '复制对应平台的安装命令，按引导完成部署即可开始使用。',
-      featuresTitle: '为什么选择 ZenMind',
-      featuresBody: '',
-      featureHighlights: [
+        'ZenMind 以 Desktop 为入口，把本地服务、Web 客户端、移动端方向、国产模型生态和本地沙箱串成同一套 Agent 体验。',
+      installTitle: '先安装，再进入工作台',
+      installBody: '选择你的平台，复制命令，在终端中启动 ZenMind Desktop 与核心服务。',
+      primaryCta: '查看文档',
+      secondaryCta: '源代码',
+      commandCaption: '官方安装入口',
+      heroStats: [
+        { value: 'Desktop', label: '统一安装、启动、监控' },
+        { value: 'AGW UI', label: '流式输出、HITL、viewport' },
+        { value: 'Sandbox', label: '长生命周期工具环境' },
+      ],
+      consoleTitle: 'ZenMind runtime',
+      consoleLines: [
+        'desktop: service center ready',
+        'app-server: token bridge online',
+        'agent-platform: AGW stream attached',
+        'container-hub: sandbox session prepared',
+      ],
+      featuresEyebrow: '核心功能',
+      featuresTitle: '滚轮向下，是 ZenMind 的完整工作流',
+      featuresIntro:
+        '不是单一聊天窗口，而是一套从桌面控制中心到本地沙箱、模型注册、交互协议的 Agent 平台。',
+      featureSections: [
         {
-          key: 'assistant',
-          title: '统一的 AI 工作台',
-          body: '将对话、工具调用、知识检索与自动化工作流整合到同一个界面，无需在多个工具之间切换。',
+          key: 'desktop',
+          title: '一个 Desktop 应用管理整套运行时',
+          body:
+            'ZenMind Desktop 负责安装、初始化、启动、停止、服务健康监控和嵌入式 Web 表面，让用户从一个控制中心进入所有能力。',
+          points: ['服务生命周期', '日志与设置', '身份令牌桥接'],
         },
         {
-          key: 'privacy',
-          title: '数据完全自主可控',
-          body: '所有数据存储在你自己的基础设施上，不经过第三方服务器，满足隐私与合规要求。',
+          key: 'models',
+          title: '面向国产模型生态的运行时注册表',
+          body:
+            '优先支持 DeepSeek V4、MiMo、MiniMax M3、Qwen/百炼等模型方向，并保留 provider registry、模型能力和用量字段的扩展空间。',
+          points: ['模型切换', 'reasoning 与 vision 标记', 'token/cache/cost usage'],
         },
         {
-          key: 'workflow',
-          title: '分钟级部署',
-          body: '基于 Docker Compose，一条命令完成安装，开箱即用，无需复杂配置。',
+          key: 'agw',
+          title: 'AGW UI 协议承载真实 Agent 交互',
+          body:
+            'AGW UI 结合 HTTP、SSE 与可选 WebSocket，支持流式输出、attach 续接、HITL、交互视图、usage 快照和子智能体调用。',
+          points: ['H2A streaming', 'question / approval / form / plan', 'agent_invoke'],
+        },
+        {
+          key: 'sandbox',
+          title: '本地沙箱让工具和办公任务长期运行',
+          body:
+            'agent-container-hub 提供本地沙箱会话、环境模板和容器工具运行时，为文档、表格、PDF、PPT 等办公自动化保留稳定执行层。',
+          points: ['长生命周期会话', '工具环境模板', 'Office 技能链路'],
+        },
+        {
+          key: 'clients',
+          title: '同一套 Agent 体验服务 Desktop、Web 与移动端',
+          body:
+            'Desktop 是入口，Web Client 渲染对话、Timeline、模型切换和 viewport；移动端方向复用同一 AGW UI 协议，而不是另起一套契约。',
+          points: ['Desktop first', 'Web timeline', 'Mobile direction'],
         },
       ],
-      quickTitle: '三步开始使用',
-      quickBody: '',
-      quickSteps: [
-        {
-          title: '安装部署',
-          body: '选择你的平台，复制安装命令，在终端中执行。',
-        },
-        {
-          title: '完成配置',
-          body: '按引导设置端口、密码等基础参数，几分钟即可完成。',
-        },
-        {
-          title: '开始使用',
-          body: '打开浏览器访问你的 ZenMind 工作台，开始探索 AI 助理能力。',
-        },
-      ],
-      ctaTitle: '查看完整安装说明',
-      ctaBody: '下载页提供各平台的详细安装说明与系统要求。',
-      ctaPrimary: '前往下载',
-      ctaSecondary: '查看文档',
-      footerTagline: '私有部署的一站式 AI 助理平台',
+      finalCtaTitle: '从安装入口进入 ZenMind',
+      finalCtaBody: '官网只负责展示与引导；安装脚本、发布产物和部署编排仍由 zenmind-deploy 维护。',
+      footerTagline: 'Desktop-first AI Agent platform for local, web, and mobile workflows.',
     },
-    download: {
-      title: '下载与安装',
-      intro: '选择你的操作系统，复制安装命令即可开始部署 ZenMind。',
-      installTitle: '平台安装命令',
-      installBody: '',
-      notesTitle: '系统要求',
-      notes: [
-        'Docker Compose 运行环境（macOS / Windows 推荐 Docker Desktop）。',
-        '可用的终端环境（Windows 用户需通过 WSL）。',
-        '建议至少 4GB 可用内存。',
-      ],
-      linksTitle: '相关资源',
-      linksBody: '',
-    },
-    faq: {
-      title: '常见问题',
-      intro: '关于部署、使用与数据隐私的常见问题。',
-      items: [
+    documents: {
+      eyebrow: 'Documents',
+      title: '文档入口',
+      intro: '第一版官网提供核心文档索引，详细内容继续以主仓库文档为事实源。',
+      cards: [
         {
-          question: 'ZenMind 是什么？',
-          answer:
-            'ZenMind 是一个私有部署的 AI 助理平台，将对话、工具调用和自动化工作流整合到统一的工作台中，适合个人开发者和小型团队使用。',
+          title: '架构说明',
+          body: 'Desktop shell、App Server、Agent Platform、Web Client 与 Container Hub 的职责边界。',
+          href: externalLinks.architecture,
         },
         {
-          question: '部署 ZenMind 需要什么环境？',
-          answer:
-            '需要安装 Docker Compose 运行环境。macOS 和 Windows 推荐使用 Docker Desktop，Linux 使用 Docker Engine。建议至少 4GB 可用内存。',
+          title: 'AGW UI 协议',
+          body: '客户端与 Agent Platform 之间的事件模型、流式传输、HITL 与 viewport 契约。',
+          href: externalLinks.agwui,
         },
         {
-          question: 'Windows 上如何安装？',
-          answer:
-            'ZenMind 目前通过 WSL（Windows Subsystem for Linux）运行。请先安装 WSL 2 和 Docker Desktop，然后在 WSL 终端中执行安装命令。',
+          title: '模型支持',
+          body: 'provider registry、模型能力、用量映射和国产模型生态优先级。',
+          href: externalLinks.models,
         },
         {
-          question: '我的数据存储在哪里？',
-          answer:
-            '所有数据存储在你自己的服务器或本地机器上，不会传输到任何第三方服务器。你对数据拥有完全的控制权。',
-        },
-        {
-          question: '如何升级到新版本？',
-          answer:
-            '使用与首次安装相同的命令即可完成升级，已有配置和数据会自动保留。',
+          title: '移动端方向',
+          body: '移动端如何复用 AGW UI 协议并与 Desktop/Web 共享 Agent 体验。',
+          href: externalLinks.mobile,
         },
       ],
     },
-    privacy: {
-      title: '隐私',
-      intro: 'ZenMind 重视你的数据隐私。以下是我们的隐私实践说明。',
-      points: [
-        'ZenMind 采用私有部署模式，所有数据存储在你自己的基础设施上。',
-        '官网本身不要求用户登录，也不收集个人身份信息。',
-        '安装过程中产生的配置数据仅保存在你的本地环境。',
-        '如未来引入分析统计功能，将在此页面更新具体的数据处理说明。',
+    news: {
+      eyebrow: 'News',
+      title: '更新记录',
+      intro: '这里记录产品叙事和公开能力的阶段性变化。没有权威发布日期的条目不写具体日期。',
+      entries: [
+        {
+          phase: '当前重点',
+          title: '官网改版为 Desktop-first 产品叙事',
+          body: '首屏聚焦安装入口，后续区块介绍 Desktop、模型生态、AGW UI、本地沙箱与跨端体验。',
+        },
+        {
+          phase: '基础架构',
+          title: 'ZenMind Desktop 包裹四个核心服务',
+          body: 'Desktop shell 统一管理 app-server、agent-platform、agent-webclient 和 agent-container-hub。',
+        },
+        {
+          phase: '协议方向',
+          title: 'AGW UI 成为客户端和 Agent Platform 的交互协议',
+          body: '协议覆盖流式输出、attach 续接、HITL、viewport、usage 快照和子智能体调用。',
+        },
+        {
+          phase: '模型方向',
+          title: '模型支持转向 registry-driven',
+          body: 'DeepSeek、MiMo、MiniMax、Qwen/百炼等生态通过 provider 与 model 定义进入运行时。',
+        },
       ],
+    },
+    market: {
+      eyebrow: 'Market',
+      title: '市场',
+      intro: 'ZenMind 市场第一版展示能力分类：技能、沙箱和插件。这里是静态公开展示，不执行安装。',
+      categories: [
+        {
+          title: '技能',
+          status: 'preview',
+          body: '面向文档、表格、PDF、PPT 与开发任务的能力包，按需进入 Agent 上下文。',
+          items: ['Office 自动化', '项目说明加载', '长文档处理'],
+        },
+        {
+          title: '沙箱',
+          status: 'soon',
+          body: '为长期任务和工具执行准备隔离环境模板，服务本地 agent-container-hub。',
+          items: ['容器工具运行时', '会话模板', '资源边界'],
+        },
+        {
+          title: '插件',
+          status: 'soon',
+          body: '扩展 Desktop、Web Client 或 Agent Platform 的工具、面板与工作流入口。',
+          items: ['服务面板', '快捷工作流', '第三方工具桥接'],
+        },
+      ],
+    },
+    login: {
+      eyebrow: 'Login',
+      title: '登录入口预留',
+      intro:
+        'ZenMind 官网不承载登录态。登录能力属于 ZenMind App Server 与 Desktop/Web Client 的产品入口，第一版官网只保留说明页。',
+      panels: [
+        {
+          title: '官网保持静态',
+          body: '这里不会收集账号、密码或会话信息，也不会接入后端 API。',
+        },
+        {
+          title: '产品登录由运行时提供',
+          body: '完成本地安装后，通过 ZenMind Desktop 或部署后的 Web Client 进入真实登录流程。',
+        },
+      ],
+      cta: '返回首页安装',
     },
     footer: {
-      domain: '主站域名',
       rights: 'All rights reserved.',
+      source: '主仓库',
     },
   },
   en: {
@@ -235,143 +290,205 @@ export const languages = {
     switchLabel: '中',
     brandMark: 'ZenMind',
     seo: {
-      title: 'ZenMind | Self-hosted AI Assistant Platform',
+      title: 'ZenMind | Desktop-first AI Agent Platform',
       description:
-        'ZenMind is a self-hosted AI assistant platform for individuals and teams. Deploy in minutes, keep your data private.',
+        'ZenMind is a Desktop-first AI agent platform for local services, web and mobile workflows, Chinese model ecosystems, and local sandboxes.',
       url: `${siteUrl}/en`,
     },
     nav: {
       home: 'Home',
-      download: 'Download',
-      faq: 'FAQ',
-      privacy: 'Privacy',
+      documents: 'Documents',
+      news: 'News',
+      market: 'Market',
+      login: 'Login',
       github: 'GitHub',
     },
-    shared: {
-      installKicker: 'Install',
-      deployDocs: 'Install Docs',
-      deployRepo: 'Deployment Repo',
-      sourceRepo: 'GitHub Repo',
-      openDocs: 'View Docs',
-      copyLabel: 'Copy command',
-      copiedLabel: 'Copied',
+    theme: {
+      label: 'Theme',
+      auto: 'Auto',
+      light: 'Light',
+      dark: 'Dark',
     },
-    kickers: {
-      features: 'Why ZenMind',
-      quickStart: 'Quick Start',
-      next: 'Next',
-      download: 'Download',
-      faq: 'FAQ',
-      privacy: 'Privacy',
+    shared: {
+      copyLabel: 'Copy',
+      copiedLabel: 'Copied',
+      openGithub: 'GitHub',
+      readDocs: 'Read docs',
+      deployDocs: 'Deploy entry',
+      statusReady: 'Available',
+      statusSoon: 'Planned',
+      statusPreview: 'Preview',
+      externalLabel: 'Open external link',
     },
     home: {
-      eyebrow: 'Self-Hosted AI Platform',
-      headline: 'Your AI Assistant\nUnder Your Control',
+      eyebrow: 'Desktop-first AI Agent Platform',
+      headline: 'Turn your home computer\ninto an AI agent workstation',
       subtitle:
-        'A self-hosted AI platform that unifies terminal, web, and intelligent services into one workspace. Easy to deploy, fully private, built for developers and small teams.',
-      primaryCta: 'Get Started',
-      secondaryCta: 'GitHub',
-      installTitle: 'Pick Your Platform',
-      installBody: 'Copy the install command for your platform and follow the setup guide.',
-      featuresTitle: 'Why ZenMind',
-      featuresBody: '',
-      featureHighlights: [
+        'ZenMind starts from Desktop and connects local services, web clients, mobile direction, Chinese model ecosystems, and local sandboxes into one agent experience.',
+      installTitle: 'Install first, then open the workspace',
+      installBody: 'Pick your platform, copy the command, and start ZenMind Desktop with the core services.',
+      primaryCta: 'Read docs',
+      secondaryCta: 'Source code',
+      commandCaption: 'Official install entry',
+      heroStats: [
+        { value: 'Desktop', label: 'Install, start, and monitor' },
+        { value: 'AGW UI', label: 'Streaming, HITL, viewport' },
+        { value: 'Sandbox', label: 'Long-lived tool environments' },
+      ],
+      consoleTitle: 'ZenMind runtime',
+      consoleLines: [
+        'desktop: service center ready',
+        'app-server: token bridge online',
+        'agent-platform: AGW stream attached',
+        'container-hub: sandbox session prepared',
+      ],
+      featuresEyebrow: 'Core features',
+      featuresTitle: 'Scroll into the ZenMind workflow',
+      featuresIntro:
+        'ZenMind is not a single chat window. It is an agent platform that spans Desktop control, local sandboxing, model registry, and an interaction protocol.',
+      featureSections: [
         {
-          key: 'assistant',
-          title: 'Unified AI Workspace',
-          body: 'Bring conversations, tool calls, knowledge retrieval, and automation into a single interface.',
+          key: 'desktop',
+          title: 'One Desktop app manages the runtime',
+          body:
+            'ZenMind Desktop installs, initializes, starts, stops, monitors service health, and embeds web surfaces so users enter every capability from one control center.',
+          points: ['Service lifecycle', 'Logs and settings', 'Token bridge'],
         },
         {
-          key: 'privacy',
-          title: 'Your Data, Your Infrastructure',
-          body: 'All data stays on your own infrastructure. No third-party servers involved.',
+          key: 'models',
+          title: 'Runtime registry for Chinese model ecosystems',
+          body:
+            'ZenMind prioritizes DeepSeek V4, MiMo, MiniMax M3, Qwen/Bailian, and keeps providers, model capabilities, and usage fields extensible.',
+          points: ['Model switching', 'Reasoning and vision flags', 'token/cache/cost usage'],
         },
         {
-          key: 'workflow',
-          title: 'Deploy in Minutes',
-          body: 'Powered by Docker Compose. One command to install, ready to use out of the box.',
+          key: 'agw',
+          title: 'AGW UI carries real agent interaction',
+          body:
+            'AGW UI combines HTTP, SSE, and optional WebSocket transport for streaming output, attach recovery, HITL, viewports, usage snapshots, and sub-agent invocation.',
+          points: ['H2A streaming', 'question / approval / form / plan', 'agent_invoke'],
+        },
+        {
+          key: 'sandbox',
+          title: 'Local sandboxes keep tools and office work running',
+          body:
+            'agent-container-hub provides local sandbox sessions, environment templates, and container-backed tool runtimes for documents, sheets, PDFs, and slides.',
+          points: ['Long-lived sessions', 'Tool environment templates', 'Office skill paths'],
+        },
+        {
+          key: 'clients',
+          title: 'One agent experience across Desktop, Web, and Mobile',
+          body:
+            'Desktop is the entry point. Web Client renders chat, timeline, model switching, and viewports. Mobile direction reuses AGW UI instead of a separate agent contract.',
+          points: ['Desktop first', 'Web timeline', 'Mobile direction'],
         },
       ],
-      quickTitle: 'Get Started in Three Steps',
-      quickBody: '',
-      quickSteps: [
-        {
-          title: 'Install',
-          body: 'Choose your platform, copy the command, and run it in your terminal.',
-        },
-        {
-          title: 'Configure',
-          body: 'Follow the setup guide to configure ports, credentials, and basic settings.',
-        },
-        {
-          title: 'Launch',
-          body: 'Open your browser, access your ZenMind workspace, and start exploring.',
-        },
-      ],
-      ctaTitle: 'View Full Install Guide',
-      ctaBody: 'The Download page has detailed install instructions and system requirements for each platform.',
-      ctaPrimary: 'Go to Download',
-      ctaSecondary: 'View Docs',
-      footerTagline: 'Self-hosted AI assistant platform for individuals and teams.',
+      finalCtaTitle: 'Start from the ZenMind install entry',
+      finalCtaBody:
+        'This website only presents and routes. Install scripts, release artifacts, and deployment orchestration remain in zenmind-deploy.',
+      footerTagline: 'Desktop-first AI Agent platform for local, web, and mobile workflows.',
     },
-    download: {
-      title: 'Download & Install',
-      intro: 'Choose your operating system and copy the install command to start deploying ZenMind.',
-      installTitle: 'Install Commands',
-      installBody: '',
-      notesTitle: 'System Requirements',
-      notes: [
-        'Docker Compose runtime (Docker Desktop recommended for macOS and Windows).',
-        'A terminal environment (Windows users need WSL).',
-        'At least 4GB of available memory recommended.',
-      ],
-      linksTitle: 'Resources',
-      linksBody: '',
-    },
-    faq: {
-      title: 'FAQ',
-      intro: 'Common questions about deployment, usage, and data privacy.',
-      items: [
+    documents: {
+      eyebrow: 'Documents',
+      title: 'Documentation entry',
+      intro: 'The first website version provides a concise docs index while the main repository remains the source of truth.',
+      cards: [
         {
-          question: 'What is ZenMind?',
-          answer:
-            'ZenMind is a self-hosted AI assistant platform that brings conversations, tool calls, and automation workflows into one unified workspace for individual developers and small teams.',
+          title: 'Architecture',
+          body: 'Responsibilities across Desktop shell, App Server, Agent Platform, Web Client, and Container Hub.',
+          href: externalLinks.architecture,
         },
         {
-          question: 'What environment do I need to deploy ZenMind?',
-          answer:
-            'You need a Docker Compose runtime. Docker Desktop is recommended for macOS and Windows, while Linux should use Docker Engine. At least 4GB of available memory is recommended.',
+          title: 'AGW UI Protocol',
+          body: 'The event model, streaming transport, HITL states, and viewport contract between clients and Agent Platform.',
+          href: externalLinks.agwui,
         },
         {
-          question: 'How do I install ZenMind on Windows?',
-          answer:
-            'ZenMind currently runs through WSL (Windows Subsystem for Linux). Install WSL 2 and Docker Desktop first, then run the install command inside your WSL terminal.',
+          title: 'Model Support',
+          body: 'Provider registry, model capabilities, usage mapping, and model ecosystem priorities.',
+          href: externalLinks.models,
         },
         {
-          question: 'Where is my data stored?',
-          answer:
-            'All data is stored on your own server or local machine and is never sent to third-party servers. You stay fully in control of your data.',
-        },
-        {
-          question: 'How do I upgrade to a new version?',
-          answer:
-            'Run the same command you used for the initial installation to upgrade. Your existing configuration and data are kept automatically.',
+          title: 'Mobile Direction',
+          body: 'How mobile clients reuse AGW UI and share the same agent experience with Desktop and Web.',
+          href: externalLinks.mobile,
         },
       ],
     },
-    privacy: {
-      title: 'Privacy',
-      intro: 'ZenMind values your data privacy. Here is how we handle it.',
-      points: [
-        'ZenMind follows a self-hosted deployment model, so all data stays on infrastructure you control.',
-        'The website itself does not require login and does not collect personally identifiable information.',
-        'Configuration data generated during installation stays only in your local environment.',
-        'If analytics features are introduced in the future, this page will be updated with specific data handling details.',
+    news: {
+      eyebrow: 'News',
+      title: 'Update log',
+      intro:
+        'This page tracks public product narrative and capability milestones. Entries without authoritative dates are intentionally undated.',
+      entries: [
+        {
+          phase: 'Current focus',
+          title: 'Website relaunched around Desktop-first product narrative',
+          body: 'The first viewport focuses on install, followed by Desktop, model ecosystem, AGW UI, local sandbox, and cross-client sections.',
+        },
+        {
+          phase: 'Foundation',
+          title: 'ZenMind Desktop wraps four core services',
+          body: 'The Desktop shell manages app-server, agent-platform, agent-webclient, and agent-container-hub.',
+        },
+        {
+          phase: 'Protocol direction',
+          title: 'AGW UI becomes the client-to-Agent-Platform protocol',
+          body: 'The protocol covers streaming output, attach recovery, HITL, viewports, usage snapshots, and sub-agent invocation.',
+        },
+        {
+          phase: 'Model direction',
+          title: 'Model support moves toward registry-driven configuration',
+          body: 'DeepSeek, MiMo, MiniMax, Qwen/Bailian, and adjacent ecosystems enter the runtime through provider and model definitions.',
+        },
       ],
+    },
+    market: {
+      eyebrow: 'Market',
+      title: 'Market',
+      intro:
+        'The first ZenMind Market page presents capability categories: skills, sandboxes, and plugins. This is a static showcase, not an installer.',
+      categories: [
+        {
+          title: 'Skills',
+          status: 'preview',
+          body: 'Capability packages for documents, sheets, PDFs, slides, and development tasks that can enter agent context on demand.',
+          items: ['Office automation', 'Project instructions', 'Long-document processing'],
+        },
+        {
+          title: 'Sandboxes',
+          status: 'soon',
+          body: 'Isolated environment templates for long-running tasks and tool execution through the local Container Hub.',
+          items: ['Container runtimes', 'Session templates', 'Resource boundaries'],
+        },
+        {
+          title: 'Plugins',
+          status: 'soon',
+          body: 'Extensions for Desktop, Web Client, or Agent Platform surfaces: tools, panels, and workflow entry points.',
+          items: ['Service panels', 'Workflow shortcuts', 'Third-party tool bridges'],
+        },
+      ],
+    },
+    login: {
+      eyebrow: 'Login',
+      title: 'Login entry reserved',
+      intro:
+        'The public website does not carry authentication state. Login belongs to ZenMind App Server and the Desktop/Web Client product surfaces, so v1 keeps this as an information page.',
+      panels: [
+        {
+          title: 'The website stays static',
+          body: 'This page does not collect accounts, passwords, sessions, or call backend APIs.',
+        },
+        {
+          title: 'Product login comes from the runtime',
+          body: 'After local installation, use ZenMind Desktop or the deployed Web Client to enter the actual login flow.',
+        },
+      ],
+      cta: 'Back to install',
     },
     footer: {
-      domain: 'Primary domain',
       rights: 'All rights reserved.',
+      source: 'Source repo',
     },
   },
 };

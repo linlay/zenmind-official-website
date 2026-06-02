@@ -6,23 +6,50 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>ZenMind | A Local-first AI Workspace</title>
+    <script>
+      (() => {
+        const storageKey = 'zenmind:theme';
+        const root = document.documentElement;
+        let storedMode = 'auto';
+        try {
+          const stored = localStorage.getItem(storageKey);
+          storedMode = stored === 'light' || stored === 'dark' || stored === 'auto' ? stored : 'auto';
+        } catch {
+          storedMode = 'auto';
+        }
+
+        const theme =
+          storedMode === 'auto'
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+            : storedMode;
+
+        root.dataset.themeMode = storedMode;
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+      })();
+    </script>
+    <title>ZenMind | Desktop-first AI Agent Platform</title>
     <meta
       name="description"
-      content="ZenMind is a local-first AI workspace for personal environments, with one entry point for install, services, and configuration."
+      content="ZenMind is a Desktop-first AI agent platform for local services, web and mobile workflows, Chinese model ecosystems, and local sandboxes."
     />
     <meta
       name="theme-color"
-      content="#0a0a0f"
+      content="#f7f7f4"
     />
-    <style>body{background:#0a0a0f}</style>
+    <style>
+      body{background:#f7f7f4}
+      html[data-theme='dark'] body{background:#08090c}
+    </style>
     <meta
       property="og:title"
-      content="ZenMind | A Local-first AI Workspace"
+      content="ZenMind | Desktop-first AI Agent Platform"
     />
     <meta
       property="og:description"
-      content="A local-first AI workspace for personal environments, with one entry point for install, services, and configuration."
+      content="A Desktop-first AI agent platform for local services, web and mobile workflows, Chinese model ecosystems, and local sandboxes."
     />
     <meta
       property="og:type"
