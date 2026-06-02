@@ -34,9 +34,9 @@ export const desktopInstallers = [
   {
     key: 'mac',
     name: 'macOS',
-    href: '/downloads/ZenMind-0.2.3-arm64.dmg',
+    href: '/install/releases/desktop/ZenMind-macOS-arm64.dmg',
     available: true,
-    version: '0.2.3',
+    version: '0.2.4',
     zh: {
       label: 'macOS',
       button: '下载 macOS 版',
