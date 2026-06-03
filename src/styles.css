@@ -1049,6 +1049,52 @@ a.content-card:hover {
   font-weight: 800;
 }
 
+.auth-failure-page .page-header {
+  margin-bottom: 28px;
+}
+
+.auth-failure-card {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.auth-failure-reason {
+  margin: 0;
+}
+
+.auth-failure-reason > div {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 74%, var(--surface-strong));
+}
+
+.auth-failure-reason dt {
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.auth-failure-reason dd {
+  margin: 6px 0 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  font-weight: 800;
+}
+
+.auth-failure-card p {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.auth-failure-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .site-footer {
   width: var(--content-width);
   margin: 0 auto;

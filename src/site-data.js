@@ -21,6 +21,7 @@ export const routeMap = {
     news: '/news',
     market: '/market',
     login: '/login',
+    authFailure: '/auth/failure',
   },
   en: {
     home: '/en',
@@ -29,6 +30,7 @@ export const routeMap = {
     news: '/en/news',
     market: '/en/market',
     login: '/en/login',
+    authFailure: '/en/auth/failure',
   },
 };
 
@@ -330,6 +332,17 @@ export const languages = {
       sessionBody: '登录请求会发送到 Go App Server，支持账号密码与 Google OAuth，服务端 session 存储在 MySQL。',
       errorFallback: '请求失败，请稍后重试。',
     },
+    authFailure: {
+      eyebrow: 'OAuth Failure',
+      title: 'Google 登录未完成',
+      intro: '这次 Google 授权没有成功建立 ZenMind 会话。你可以重新登录，或先返回首页。',
+      status: '登录失败',
+      reasonLabel: '错误码',
+      unknownReason: 'unknown',
+      reasonHelp: '如果连续出现同一个错误码，请联系管理员检查 Google OAuth 配置和服务端日志。',
+      loginCta: '返回登录',
+      homeCta: '返回首页',
+    },
     footer: {
       rights: 'All rights reserved.',
       source: '主仓库',
@@ -568,6 +581,17 @@ export const languages = {
       sessionTitle: 'Real backend session',
       sessionBody: 'Login requests go to the Go App Server. Password and Google OAuth sessions are stored in MySQL.',
       errorFallback: 'Request failed. Please try again.',
+    },
+    authFailure: {
+      eyebrow: 'OAuth Failure',
+      title: 'Google sign-in did not finish',
+      intro: 'Google authorization did not create a ZenMind session this time. You can try signing in again or return home.',
+      status: 'Sign-in failed',
+      reasonLabel: 'Error code',
+      unknownReason: 'unknown',
+      reasonHelp: 'If the same error code keeps appearing, ask an administrator to check Google OAuth settings and server logs.',
+      loginCta: 'Back to login',
+      homeCta: 'Back home',
     },
     footer: {
       rights: 'All rights reserved.',

@@ -3,7 +3,7 @@ import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-route
 import { desktopInstallers, externalLinks, githubUrl, languages, routeMap, siteUrl } from './site-data';
 
 const pageOrder = ['home', 'download', 'documents', 'news', 'market'];
-const routeOrder = ['home', 'download', 'documents', 'news', 'market', 'login'];
+const routeOrder = ['home', 'download', 'documents', 'news', 'market', 'login', 'authFailure'];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
 const apiBase = import.meta.env.VITE_API_BASE || '/api';
@@ -930,6 +930,38 @@ function LoginPage({ lang }) {
   );
 }
 
+function AuthFailurePage({ lang }) {
+  const copy = languages[lang];
+  const location = useLocation();
+  const reason = new URLSearchParams(location.search).get('error') || copy.authFailure.unknownReason;
+
+  return (
+    <section className="page-section auth-failure-page">
+      <PageHeader eyebrow={copy.authFailure.eyebrow} title={copy.authFailure.title} intro={copy.authFailure.intro} />
+      <article className="content-card auth-failure-card" data-reveal>
+        <span className="status-pill status-soon">{copy.authFailure.status}</span>
+        <dl className="auth-failure-reason">
+          <div>
+            <dt>{copy.authFailure.reasonLabel}</dt>
+            <dd>{reason}</dd>
+          </div>
+        </dl>
+        <p>{copy.authFailure.reasonHelp}</p>
+        <div className="auth-failure-actions">
+          <Link className="button button-primary" to={pathFor(lang, 'login')}>
+            <span>{copy.authFailure.loginCta}</span>
+            <Icon type="arrow" />
+          </Link>
+          <Link className="button button-secondary" to={pathFor(lang, 'home')}>
+            <span>{copy.authFailure.homeCta}</span>
+            <Icon type="arrow" />
+          </Link>
+        </div>
+      </article>
+    </section>
+  );
+}
+
 function Footer({ lang }) {
   const copy = languages[lang];
 
@@ -973,6 +1005,7 @@ function RoutedPage({ lang, pageKey, theme }) {
     news: <NewsPage lang={lang} />,
     market: <MarketPage lang={lang} />,
     login: <LoginPage lang={lang} />,
+    authFailure: <AuthFailurePage lang={lang} />,
   };
 
   return (
