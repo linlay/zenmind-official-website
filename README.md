@@ -1,26 +1,29 @@
 # ZenMind Website
 
-ZenMind 官网仓库，用于构建并发布 `www.zenmind.cc` 的双语静态品牌站。
+ZenMind 官网前端仓库，用于构建并发布 `www.zenmind.cc` 的双语官网。
 
 ## 1. 项目定位
 
-`zenmind-website` 现在只负责官网展示，不再负责安装脚本源码、release 产物生成、Nginx 部署配置或服务器部署编排。
+`website` 只负责官网前端展示和登录 UI。真实认证 API 由同级 `../server` 项目提供。
 
 当前职责边界：
 
-- 官网首页与下载页展示
+- 官网首页与 Desktop 下载入口展示
 - 中英文双语路由
-- FAQ 与隐私页
+- 文档、新闻、市场页面
 - GitHub 与官方 deploy 入口引导
+- `/login` 账号密码登录 UI
 
 不负责的内容：
 
 - `/install/*.sh` 脚本源码维护
 - release manifest / index 生成
-- Docker / Compose / Nginx 部署资产
 - 服务器发布与部署
+- Go App Server 认证实现
+- MySQL 用户与会话存储
+- 跨项目 Docker Compose 编排
 
-以上发布与部署相关流程统一由 `zenmind-deploy` 负责。
+后端实现位于同级 `../server` 项目。
 
 ## 2. 本地开发
 
@@ -44,21 +47,25 @@ npm run build
 
 构建产物输出到 `dist/`。
 
+登录页默认通过 `VITE_API_BASE=/api` 调用后端。生产环境需要由外部网关或部署平台把 `/api` 转发到 `server` 服务。
+
 ## 3. 当前路由
 
 中文：
 
 - `/`
-- `/download`
-- `/faq`
-- `/privacy`
+- `/documents`
+- `/news`
+- `/market`
+- `/login`
 
 English:
 
 - `/en`
-- `/en/download`
-- `/en/faq`
-- `/en/privacy`
+- `/en/documents`
+- `/en/news`
+- `/en/market`
+- `/en/login`
 
 ## 4. 内容与数据维护
 
@@ -67,7 +74,7 @@ English:
 - `src/site-data.js`
   - 维护路由映射
   - 维护官网文案
-  - 维护 `externalLinks` 与 `installEntries`
+- 维护 `externalLinks` 与 `desktopInstallers`
 - `src/App.jsx`
   - 维护页面结构、路由映射与复用组件
 - `src/styles.css`
@@ -75,15 +82,16 @@ English:
 
 安装入口策略：
 
-- 官网仍展示 macOS、Linux、Windows (WSL) 的安装命令
-- 首页与下载页复用同一份 `installEntries`
-- 官网只展示命令与说明，不再把这些脚本作为仓库产物维护
+- 官网仍展示 macOS、Windows 与 Linux 的 Desktop 安装入口状态
+- 首页复用同一份 `desktopInstallers`
+- 官网只展示下载入口与说明，不再把安装脚本作为仓库产物维护
 
 ## 5. 与 zenmind-deploy 的关系
 
 官网与部署仓库的协作方式如下：
 
-- `zenmind-website` 负责公开页面与品牌表达
+- `website` 负责公开页面、品牌表达和登录 UI
+- `server` 负责认证 API、用户与会话存储
 - `zenmind-deploy` 负责安装脚本生成、release 产物、官网静态发布和服务器部署
 - 当安装入口或 deploy 流程变化时，官网只需要更新文案与链接常量
 
@@ -98,7 +106,7 @@ English:
 
 - 新增或修改官网文案时，优先更新 `src/site-data.js`
 - 保持首页主导的信息结构，不再恢复独立 `Architecture` 页面
-- 官网只负责说明和引导，不要把 deploy 逻辑重新带回本仓库
+- 官网只负责说明、引导和登录 UI；后端与发布编排不要带回本仓库
 - 动效需兼容 `prefers-reduced-motion`
 - 修改页面后至少执行一次 `npm run build`
 
@@ -112,8 +120,8 @@ npm run build
 
 确认：
 
-- 中英文 8 个页面入口可构建
-- 首页首屏能直接看到三平台安装命令
-- Download 页能清楚展示官网与 deploy 的职责分离
+- 中英文 10 个页面入口可构建
+- 首页首屏能直接看到 Desktop 下载入口
+- `/login` 登录 UI 构建通过，并只依赖 `VITE_API_BASE`
 
 # zenmind-website

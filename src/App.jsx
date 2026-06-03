@@ -6,6 +6,26 @@ const pageOrder = ['home', 'documents', 'news', 'market'];
 const routeOrder = ['home', 'documents', 'news', 'market', 'login'];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
+const apiBase = import.meta.env.VITE_API_BASE || '/api';
+
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${apiBase}${path}`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = data.error?.message || data.message || 'Request failed.';
+    throw new Error(message);
+  }
+
+  return data;
+}
 
 function normalizePlatform(value) {
   const source = String(value || '').toLowerCase();
@@ -685,21 +705,147 @@ function MarketPage({ lang }) {
 
 function LoginPage({ lang }) {
   const copy = languages[lang];
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    apiRequest('/auth/me')
+      .then((data) => {
+        if (!cancelled) {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setSubmitting(true);
+
+    try {
+      const data = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      setUser(data.user);
+      setPassword('');
+    } catch (err) {
+      setError(err.message || copy.login.errorFallback);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setError('');
+    setSubmitting(true);
+
+    try {
+      await apiRequest('/auth/logout', { method: 'POST', body: '{}' });
+      setUser(null);
+      setPassword('');
+    } catch (err) {
+      setError(err.message || copy.login.errorFallback);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.assign(`${apiBase}/auth/google/start`);
+  };
 
   return (
     <section className="page-section login-page">
       <PageHeader eyebrow={copy.login.eyebrow} title={copy.login.title} intro={copy.login.intro} />
-      <div className="login-panels">
-        {copy.login.panels.map((panel) => (
-          <article className="content-card" key={panel.title} data-reveal>
-            <h2>{panel.title}</h2>
-            <p>{panel.body}</p>
-          </article>
-        ))}
-      </div>
-      <div className="login-actions" data-reveal>
-        <ButtonLink href={pathFor(lang, 'home')} label={copy.login.cta} />
-        <ButtonLink href={externalLinks.github} label={copy.shared.openGithub} variant="secondary" external />
+      <div className="login-shell" data-reveal>
+        <form className="login-form content-card" onSubmit={handleSubmit}>
+          <h2>{copy.login.formTitle}</h2>
+          <label>
+            <span>{copy.login.emailLabel}</span>
+            <input
+              autoComplete="email"
+              disabled={loading || submitting || Boolean(user)}
+              inputMode="email"
+              name="email"
+              required
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </label>
+          <label>
+            <span>{copy.login.passwordLabel}</span>
+            <input
+              autoComplete="current-password"
+              disabled={loading || submitting || Boolean(user)}
+              name="password"
+              required
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          {error ? <p className="login-error">{error}</p> : null}
+          <button className="button button-primary login-submit" disabled={loading || submitting || Boolean(user)} type="submit">
+            <span>{submitting ? copy.login.submitting : copy.login.submit}</span>
+            <Icon type="arrow" />
+          </button>
+          <button className="button button-secondary login-submit google-submit" disabled={loading || submitting || Boolean(user)} type="button" onClick={handleGoogleLogin}>
+            <span>{copy.login.googleSubmit}</span>
+            <Icon type="external" />
+          </button>
+        </form>
+
+        <aside className="login-status content-card">
+          <span className={`status-pill status-${user ? 'ready' : 'preview'}`}>
+            {loading ? copy.login.checking : user ? copy.login.signedIn : copy.login.signedOut}
+          </span>
+          {user ? (
+            <>
+              <h2>{copy.login.welcome}</h2>
+              <dl>
+                <div>
+                  <dt>{copy.login.accountLabel}</dt>
+                  <dd>{user.email}</dd>
+                </div>
+                <div>
+                  <dt>{copy.login.roleLabel}</dt>
+                  <dd>{user.role}</dd>
+                </div>
+              </dl>
+              <button className="button button-secondary login-submit" disabled={submitting} type="button" onClick={handleLogout}>
+                <span>{copy.login.logout}</span>
+                <Icon type="arrow" />
+              </button>
+            </>
+          ) : (
+            <>
+              <h2>{copy.login.sessionTitle}</h2>
+              <p>{copy.login.sessionBody}</p>
+            </>
+          )}
+        </aside>
       </div>
     </section>
   );

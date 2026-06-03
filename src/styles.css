@@ -390,8 +390,7 @@ button {
   background: color-mix(in srgb, var(--bg) 20%, transparent);
 }
 
-.hero-actions,
-.login-actions {
+.hero-actions {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -779,7 +778,7 @@ button {
 
 .card-grid,
 .market-grid,
-.login-panels {
+.login-shell {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -867,9 +866,92 @@ a.content-card:hover {
   min-height: calc(100svh - 210px);
 }
 
-.login-actions {
-  justify-content: flex-start;
-  margin-top: 18px;
+.login-shell {
+  align-items: stretch;
+}
+
+.login-form,
+.login-status {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.login-form input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+}
+
+.login-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.login-form input:disabled {
+  color: var(--text-soft);
+  background: var(--surface-muted);
+}
+
+.login-submit {
+  justify-self: flex-start;
+  border: 0;
+  cursor: pointer;
+}
+
+.login-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.google-submit {
+  margin-top: -8px;
+}
+
+.login-error {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #d64545 42%, var(--border));
+  border-radius: var(--radius);
+  color: #b42318;
+  background: color-mix(in srgb, #d64545 12%, var(--surface));
+  font-weight: 700;
+}
+
+.login-status dl {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.login-status dl > div {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.login-status dt {
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-status dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
 }
 
 .site-footer {
@@ -1002,7 +1084,7 @@ a.content-card:hover {
   .hero-stats,
   .card-grid,
   .market-grid,
-  .login-panels {
+  .login-shell {
     grid-template-columns: 1fr;
   }
 
