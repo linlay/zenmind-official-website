@@ -837,6 +837,101 @@ a.content-card:hover {
   gap: 14px;
 }
 
+.download-page .page-header {
+  max-width: 900px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+}
+
+.download-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.download-section {
+  overflow: hidden;
+}
+
+.download-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
+  gap: 30px;
+  align-items: center;
+}
+
+.download-card h2 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.08;
+  font-weight: 760;
+}
+
+.download-card p {
+  margin: 16px 0 0;
+  max-width: 560px;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.download-actions {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.download-actions .button {
+  min-width: 190px;
+}
+
+.download-visual {
+  min-height: 320px;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 48%, transparent), transparent 44%),
+    color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.download-section.is-mobile .download-visual {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--warning) 14%, transparent), transparent 44%),
+    color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+}
+
+.download-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.download-title-row .status-pill {
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.download-soon-badge {
+  justify-self: flex-start;
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--warning);
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .status-pill {
   min-height: 28px;
   padding: 0 10px;
@@ -1026,7 +1121,8 @@ a.content-card:hover {
   }
 
   .hero-lower,
-  .feature-row {
+  .feature-row,
+  .download-card {
     grid-template-columns: 1fr;
   }
 
@@ -1053,6 +1149,10 @@ a.content-card:hover {
 
   .feature-visual {
     min-height: 360px;
+  }
+
+  .download-card h2 {
+    font-size: 36px;
   }
 }
 
@@ -1090,6 +1190,32 @@ a.content-card:hover {
 
   .copy-button {
     width: 100%;
+  }
+
+  .download-card {
+    gap: 20px;
+  }
+
+  .download-card h2 {
+    font-size: 30px;
+  }
+
+  .download-card p {
+    font-size: 16px;
+  }
+
+  .download-actions .button {
+    width: 100%;
+  }
+
+  .download-visual {
+    min-height: 280px;
+  }
+
+  .download-title-row {
+    display: grid;
+    justify-items: flex-start;
+    gap: 12px;
   }
 
   .feature-story,

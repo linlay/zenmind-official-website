@@ -69,6 +69,7 @@ WEBSITE_PORT=8081 docker compose up --build
 中文：
 
 - `/`
+- `/download`
 - `/documents`
 - `/news`
 - `/market`
@@ -77,6 +78,7 @@ WEBSITE_PORT=8081 docker compose up --build
 English:
 
 - `/en`
+- `/en/download`
 - `/en/documents`
 - `/en/news`
 - `/en/market`

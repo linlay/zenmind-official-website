@@ -16,6 +16,7 @@ export const externalLinks = {
 export const routeMap = {
   zh: {
     home: '/',
+    download: '/download',
     documents: '/documents',
     news: '/news',
     market: '/market',
@@ -23,6 +24,7 @@ export const routeMap = {
   },
   en: {
     home: '/en',
+    download: '/en/download',
     documents: '/en/documents',
     news: '/en/news',
     market: '/en/market',
@@ -109,6 +111,7 @@ export const languages = {
     },
     nav: {
       home: '首页',
+      download: '下载',
       documents: '文档',
       news: '新闻',
       market: '市场',
@@ -234,6 +237,26 @@ export const languages = {
         },
       ],
     },
+    download: {
+      eyebrow: 'Download',
+      title: '下载 ZenMind',
+      intro: '从桌面版开始进入 ZenMind。移动版正在准备中，会复用同一套 Agent 体验。',
+      desktop: {
+        eyebrow: 'Desktop',
+        title: '下载 ZenMind 桌面版',
+        intro: '安装桌面版后统一管理本地服务、Agent 运行时、日志与健康状态。',
+        visualTitle: 'ZenMind Desktop',
+        visualRows: ['服务中心', 'Agent 运行时', '本地沙箱', '跨端入口'],
+      },
+      mobile: {
+        eyebrow: 'Mobile',
+        title: '下载 ZenMind 移动版',
+        intro: '移动端正在规划中，将继续复用 AGW UI 协议与 Desktop-first 工作流。',
+        status: '敬请期待',
+        visualTitle: 'ZenMind Mobile',
+        visualRows: ['对话续接', '任务状态', '移动工作流'],
+      },
+    },
     news: {
       eyebrow: 'News',
       title: '更新记录',
@@ -324,6 +347,7 @@ export const languages = {
     },
     nav: {
       home: 'Home',
+      download: 'Download',
       documents: 'Documents',
       news: 'News',
       market: 'Market',
@@ -449,6 +473,26 @@ export const languages = {
           href: externalLinks.mobile,
         },
       ],
+    },
+    download: {
+      eyebrow: 'Download',
+      title: 'Download ZenMind',
+      intro: 'Start with ZenMind Desktop. Mobile is being prepared and will reuse the same agent experience.',
+      desktop: {
+        eyebrow: 'Desktop',
+        title: 'Download ZenMind Desktop',
+        intro: 'Install the desktop app to manage local services, agent runtime, logs, and health from one place.',
+        visualTitle: 'ZenMind Desktop',
+        visualRows: ['Service center', 'Agent runtime', 'Local sandbox', 'Cross-client entry'],
+      },
+      mobile: {
+        eyebrow: 'Mobile',
+        title: 'Download ZenMind Mobile',
+        intro: 'Mobile is planned and will continue to reuse AGW UI and the Desktop-first workflow.',
+        status: 'Coming soon',
+        visualTitle: 'ZenMind Mobile',
+        visualRows: ['Chat continuity', 'Task status', 'Mobile workflow'],
+      },
     },
     news: {
       eyebrow: 'News',

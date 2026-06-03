@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { desktopInstallers, externalLinks, githubUrl, languages, routeMap, siteUrl } from './site-data';
 
-const pageOrder = ['home', 'documents', 'news', 'market'];
-const routeOrder = ['home', 'documents', 'news', 'market', 'login'];
+const pageOrder = ['home', 'download', 'documents', 'news', 'market'];
+const routeOrder = ['home', 'download', 'documents', 'news', 'market', 'login'];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
 const apiBase = import.meta.env.VITE_API_BASE || '/api';
@@ -703,6 +703,85 @@ function MarketPage({ lang }) {
   );
 }
 
+function DownloadVisual({ title, rows, status }) {
+  return (
+    <div className="download-visual" aria-hidden="true">
+      <div className="visual-window">
+        <div className="visual-window-top">
+          <span />
+          <span />
+          <span />
+          <strong>{title}</strong>
+        </div>
+        <div className="visual-window-body">
+          {rows.map((row, index) => (
+            <div className="visual-row" key={row}>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              <strong>{row}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+      {status ? <span className="download-soon-badge">{status}</span> : null}
+    </div>
+  );
+}
+
+function DownloadPage({ lang }) {
+  const copy = languages[lang];
+  const downloadCopy = copy.download;
+  const availableDesktopInstallers = desktopInstallers.filter((installer) => installer.available);
+
+  return (
+    <section className="page-section download-page">
+      <PageHeader eyebrow={downloadCopy.eyebrow} title={downloadCopy.title} intro={downloadCopy.intro} />
+
+      <div className="download-stack">
+        <article className="download-section content-card" data-reveal>
+          <div className="download-card">
+            <div>
+              <span className="card-kicker">{downloadCopy.desktop.eyebrow}</span>
+              <h2>{downloadCopy.desktop.title}</h2>
+              <p>{downloadCopy.desktop.intro}</p>
+              <div className="download-actions">
+                {availableDesktopInstallers.map((installer) => {
+                  const localized = installer[lang];
+
+                  return (
+                    <a className="button button-primary" href={installer.href} download key={installer.key}>
+                      <Icon type="download" />
+                      <span>{localized.button}</span>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+            <DownloadVisual title={downloadCopy.desktop.visualTitle} rows={downloadCopy.desktop.visualRows} />
+          </div>
+        </article>
+
+        <article className="download-section content-card is-mobile" data-reveal>
+          <div className="download-card">
+            <div>
+              <span className="card-kicker">{downloadCopy.mobile.eyebrow}</span>
+              <div className="download-title-row">
+                <h2>{downloadCopy.mobile.title}</h2>
+                <span className="status-pill status-soon">{downloadCopy.mobile.status}</span>
+              </div>
+              <p>{downloadCopy.mobile.intro}</p>
+            </div>
+            <DownloadVisual
+              status={downloadCopy.mobile.status}
+              title={downloadCopy.mobile.visualTitle}
+              rows={downloadCopy.mobile.visualRows}
+            />
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function LoginPage({ lang }) {
   const copy = languages[lang];
   const [email, setEmail] = useState('');
@@ -889,6 +968,7 @@ function PageLayout({ lang, pageKey, theme, children }) {
 function RoutedPage({ lang, pageKey, theme }) {
   const pages = {
     home: <HomePage lang={lang} />,
+    download: <DownloadPage lang={lang} />,
     documents: <DocumentsPage lang={lang} />,
     news: <NewsPage lang={lang} />,
     market: <MarketPage lang={lang} />,
