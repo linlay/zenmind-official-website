@@ -12,9 +12,9 @@
 - 提供 FAQ 与隐私页
 - 不承载业务 API
 - 不承载登录态和产品后台
-- 不维护安装脚本、发布脚本和服务器部署配置
+- 不维护安装脚本、发布脚本和后端部署配置
 
-安装、release、网站发布与服务器部署统一由 `zenmind-deploy` 负责。
+本仓库提供官网容器部署入口；安装、release 与更上层发布编排由 `zenmind-deploy` 负责。
 
 ## 2. 技术栈
 
@@ -47,7 +47,8 @@
 
 - 官网根域名只做静态公开页面
 - 官网负责安装入口展示，但不负责安装脚本源码
-- 部署与发布资产不应重新放回本仓库
+- 官网 nginx 可代理 `/api` 到共享 Docker 网络中的后端服务
+- 后端、MySQL、发布脚本与 release 资产不应重新放回本仓库
 
 ## 4. 目录结构
 
@@ -55,6 +56,9 @@
 zenmind-website/
   README.md
   AGENTS.md
+  compose.yml
+  Dockerfile
+  nginx.conf
   package.json
   vite.config.js
   index.html
@@ -75,6 +79,8 @@ zenmind-website/
 
 - `src/`：站点源码与内容模型
 - `public/`：原样拷贝到构建产物的公开静态文件
+- `compose.yml`：官网容器入口，加入外部网络 `zenmind-official-net`
+- `nginx.conf`：静态站点服务与 `/api` 代理配置
 - `dist/`：构建产物目录，不作为事实源
 
 ## 5. 内容数据结构
@@ -118,7 +124,8 @@ zenmind-website/
    - 首屏优先展示价值主张与安装入口
    - 不要重新加入大量口号、架构页式内容或 Demo 占位
 3. 官网与 deploy 明确分离
-   - 安装脚本、release manifest、Nginx、Docker、Compose 不属于本仓库
+   - 官网维护自己的 Docker、Compose 与 nginx 入口
+   - 安装脚本、release manifest、后端服务和发布脚本不属于本仓库
    - 若 deploy 入口变化，只更新链接与说明，不在本仓库复制 deploy 逻辑
 4. 可访问性
    - 兼容 `prefers-reduced-motion`
@@ -139,6 +146,7 @@ npm run dev
 
 ```bash
 npm run build
+docker compose config
 ```
 
 修改安装入口时的建议流程：
@@ -152,5 +160,6 @@ npm run build
 1. 官网当前为纯静态站，不支持 SSR
 2. `externalLinks.deployDocs` 与 `externalLinks.deployRepo` 是 deploy 入口单一事实源
 3. 若 deploy 的公开地址后续调整，应直接更新 `src/site-data.js`
-4. `dist/` 是构建结果，不应手工维护
-5. `node_modules/` 不是事实源
+4. 容器部署依赖外部网络 `zenmind-official-net`
+5. `dist/` 是构建结果，不应手工维护
+6. `node_modules/` 不是事实源

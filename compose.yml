@@ -1,0 +1,18 @@
+services:
+  website:
+    build:
+      context: .
+      args:
+        VITE_API_BASE: ${VITE_API_BASE:-/api}
+    image: zenmind-official-website
+    container_name: zenmind-official-website
+    ports:
+      - "${WEBSITE_PORT:-80}:80"
+    networks:
+      zenmind-official-net:
+        aliases:
+          - zenmind-official-website
+
+networks:
+  zenmind-official-net:
+    external: true

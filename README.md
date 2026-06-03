@@ -18,10 +18,10 @@ ZenMind 官网前端仓库，用于构建并发布 `www.zenmind.cc` 的双语官
 
 - `/install/*.sh` 脚本源码维护
 - release manifest / index 生成
-- 服务器发布与部署
+- 服务器发布脚本与 release 编排
 - Go App Server 认证实现
 - MySQL 用户与会话存储
-- 跨项目 Docker Compose 编排
+- 后端与 MySQL 的 Compose 编排
 
 后端实现位于同级 `../server` 项目。
 
@@ -47,7 +47,22 @@ npm run build
 
 构建产物输出到 `dist/`。
 
-登录页默认通过 `VITE_API_BASE=/api` 调用后端。生产环境需要由外部网关或部署平台把 `/api` 转发到 `server` 服务。
+登录页默认通过 `VITE_API_BASE=/api` 调用后端。容器部署时，项目内的 nginx 会把 `/api` 代理到共享 Docker 网络里的 `zenmind-official-server:8080`。
+
+### 容器部署
+
+官网容器使用项目内 `compose.yml` 部署。它会加入外部专用网络 `zenmind-official-net`，需要先创建一次：
+
+```bash
+docker network create zenmind-official-net
+docker compose up --build
+```
+
+默认暴露 `80:80`，可通过 `WEBSITE_PORT` 覆盖宿主机端口：
+
+```bash
+WEBSITE_PORT=8081 docker compose up --build
+```
 
 ## 3. 当前路由
 
@@ -92,7 +107,8 @@ English:
 
 - `website` 负责公开页面、品牌表达和登录 UI
 - `server` 负责认证 API、用户与会话存储
-- `zenmind-deploy` 负责安装脚本生成、release 产物、官网静态发布和服务器部署
+- `website` 与 `server` 各自提供项目内 `compose.yml`，并通过 `zenmind-official-net` 联通
+- `zenmind-deploy` 负责安装脚本生成、release 产物和更上层的发布编排
 - 当安装入口或 deploy 流程变化时，官网只需要更新文案与链接常量
 
 当前代码中为 deploy 预留了统一入口：
@@ -106,7 +122,7 @@ English:
 
 - 新增或修改官网文案时，优先更新 `src/site-data.js`
 - 保持首页主导的信息结构，不再恢复独立 `Architecture` 页面
-- 官网只负责说明、引导和登录 UI；后端与发布编排不要带回本仓库
+- 官网只负责说明、引导、登录 UI 与官网容器入口；后端与发布脚本不要带回本仓库
 - 动效需兼容 `prefers-reduced-motion`
 - 修改页面后至少执行一次 `npm run build`
 
@@ -116,6 +132,7 @@ English:
 
 ```bash
 npm run build
+docker compose config
 ```
 
 确认：
