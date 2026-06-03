@@ -6,6 +6,7 @@ const pageOrder = ['home', 'download', 'documents', 'news', 'market'];
 const routeOrder = ['home', 'download', 'documents', 'news', 'market', 'login', 'authFailure'];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
+const downloadCountStoragePrefix = 'zenmind:download-counted:';
 const apiBase = import.meta.env.VITE_API_BASE || '/api';
 
 async function apiRequest(path, options = {}) {
@@ -114,6 +115,71 @@ function writeStoredThemeMode(mode) {
   } catch {
     // Theme still applies through documentElement dataset when storage is unavailable.
   }
+}
+
+function downloadCountedStorageKey(installerKey) {
+  return `${downloadCountStoragePrefix}${installerKey}`;
+}
+
+function hasCountedDownload(installerKey) {
+  try {
+    return window.localStorage.getItem(downloadCountedStorageKey(installerKey)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markDownloadCounted(installerKey) {
+  try {
+    window.localStorage.setItem(downloadCountedStorageKey(installerKey), '1');
+  } catch {
+    // The download should continue even when browser storage is unavailable.
+  }
+}
+
+function recordDownloadEvent(installerKey) {
+  fetch(`${apiBase}/downloads/events`, {
+    method: 'POST',
+    credentials: 'include',
+    keepalive: true,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ installerKey }),
+  }).catch(() => {});
+}
+
+function useDownloadTotals() {
+  const [totals, setTotals] = useState({});
+
+  useEffect(() => {
+    let cancelled = false;
+
+    apiRequest('/downloads/stats')
+      .then((data) => {
+        if (!cancelled) {
+          setTotals(data.totals || {});
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setTotals({});
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const incrementLocalTotal = useCallback((installerKey) => {
+    setTotals((current) => ({
+      ...current,
+      [installerKey]: Number(current[installerKey] || 0) + 1,
+    }));
+  }, []);
+
+  return { totals, incrementLocalTotal };
 }
 
 function useThemeMode() {
@@ -435,6 +501,7 @@ function Header({ lang, pageKey, theme }) {
 function DesktopDownload({ lang }) {
   const detectedPlatform = useDetectedDesktopPlatform();
   const copy = languages[lang];
+  const { totals, incrementLocalTotal } = useDownloadTotals();
   const linuxFallback = desktopInstallers.find((entry) => entry.key === 'linux');
   const unknownInstaller = {
     key: 'unknown',
@@ -451,14 +518,31 @@ function DesktopDownload({ lang }) {
   };
   const selectedInstaller = desktopInstallers.find((entry) => entry.key === detectedPlatform) || unknownInstaller;
   const localized = selectedInstaller[lang];
+  const selectedTotal = Number(totals[selectedInstaller.key] || 0);
+
+  const handleDownloadClick = () => {
+    if (!selectedInstaller.available || hasCountedDownload(selectedInstaller.key)) {
+      return;
+    }
+    markDownloadCounted(selectedInstaller.key);
+    incrementLocalTotal(selectedInstaller.key);
+    recordDownloadEvent(selectedInstaller.key);
+  };
 
   return (
     <div className={`download-panel${selectedInstaller.available ? '' : ' is-unavailable'}`} data-reveal>
       {selectedInstaller.available ? (
-        <a className="download-primary" href={selectedInstaller.href} download>
-          <Icon type="download" />
-          <span>{localized.button}</span>
-        </a>
+        <>
+          <a className="download-primary" href={selectedInstaller.href} download onClick={handleDownloadClick}>
+            <Icon type="download" />
+            <span>{localized.button}</span>
+          </a>
+          <span className="download-count">
+            {copy.shared.downloadTotalPrefix}
+            <strong>{selectedTotal.toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</strong>
+            {copy.shared.downloadTotalSuffix}
+          </span>
+        </>
       ) : (
         <div className="download-unavailable">
           <strong>{copy.home.downloadUnavailableTitle}</strong>
@@ -785,10 +869,13 @@ function DownloadPage({ lang }) {
 function LoginPage({ lang }) {
   const copy = languages[lang];
   const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -816,7 +903,46 @@ function LoginPage({ lang }) {
     };
   }, []);
 
-  const handleSubmit = async (event) => {
+  const disabled = loading || submitting || sendingCode || Boolean(user);
+
+  const handleSendCode = async () => {
+    setError('');
+    setSendingCode(true);
+
+    try {
+      await apiRequest('/auth/email-code/start', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      });
+      setCodeSent(true);
+    } catch (err) {
+      setError(err.message || copy.login.errorFallback);
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleEmailCodeSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setSubmitting(true);
+
+    try {
+      const data = await apiRequest('/auth/email-code/verify', {
+        method: 'POST',
+        body: JSON.stringify({ email, code }),
+      });
+      setUser(data.user);
+      setCode('');
+      setPassword('');
+    } catch (err) {
+      setError(err.message || copy.login.errorFallback);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (event) => {
     event.preventDefault();
     setError('');
     setSubmitting(true);
@@ -827,6 +953,7 @@ function LoginPage({ lang }) {
         body: JSON.stringify({ email, password }),
       });
       setUser(data.user);
+      setCode('');
       setPassword('');
     } catch (err) {
       setError(err.message || copy.login.errorFallback);
@@ -842,6 +969,7 @@ function LoginPage({ lang }) {
     try {
       await apiRequest('/auth/logout', { method: 'POST', body: '{}' });
       setUser(null);
+      setCode('');
       setPassword('');
     } catch (err) {
       setError(err.message || copy.login.errorFallback);
@@ -858,43 +986,76 @@ function LoginPage({ lang }) {
     <section className="page-section login-page">
       <PageHeader eyebrow={copy.login.eyebrow} title={copy.login.title} intro={copy.login.intro} />
       <div className="login-shell" data-reveal>
-        <form className="login-form content-card" onSubmit={handleSubmit}>
+        <div className="login-form content-card">
           <h2>{copy.login.formTitle}</h2>
-          <label>
-            <span>{copy.login.emailLabel}</span>
-            <input
-              autoComplete="email"
-              disabled={loading || submitting || Boolean(user)}
-              inputMode="email"
-              name="email"
-              required
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-          <label>
-            <span>{copy.login.passwordLabel}</span>
-            <input
-              autoComplete="current-password"
-              disabled={loading || submitting || Boolean(user)}
-              name="password"
-              required
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
-          </label>
-          {error ? <p className="login-error">{error}</p> : null}
-          <button className="button button-primary login-submit" disabled={loading || submitting || Boolean(user)} type="submit">
-            <span>{submitting ? copy.login.submitting : copy.login.submit}</span>
-            <Icon type="arrow" />
-          </button>
-          <button className="button button-secondary login-submit google-submit" disabled={loading || submitting || Boolean(user)} type="button" onClick={handleGoogleLogin}>
-            <span>{copy.login.googleSubmit}</span>
-            <Icon type="external" />
-          </button>
-        </form>
+          <form className="email-code-form" onSubmit={handleEmailCodeSubmit}>
+            <label>
+              <span>{copy.login.emailLabel}</span>
+              <input
+                autoComplete="email"
+                disabled={disabled}
+                inputMode="email"
+                name="email"
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+            <div className="login-code-row">
+              <label>
+                <span>{copy.login.codeLabel}</span>
+                <input
+                  autoComplete="one-time-code"
+                  disabled={disabled}
+                  inputMode="numeric"
+                  maxLength={6}
+                  name="code"
+                  pattern="[0-9]{6}"
+                  placeholder={copy.login.codePlaceholder}
+                  required
+                  type="text"
+                  value={code}
+                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                />
+              </label>
+              <button className="button button-secondary login-code-button" disabled={disabled || !email} type="button" onClick={handleSendCode}>
+                <span>{sendingCode ? copy.login.sendingCode : codeSent ? copy.login.resendCode : copy.login.sendCode}</span>
+              </button>
+            </div>
+            {codeSent ? <p className="login-hint">{copy.login.codeSent}</p> : null}
+            {error ? <p className="login-error">{error}</p> : null}
+            <button className="button button-primary login-submit" disabled={disabled || code.length !== 6} type="submit">
+              <span>{submitting ? copy.login.verifyingCode : copy.login.verifySubmit}</span>
+              <Icon type="arrow" />
+            </button>
+            <button className="button button-secondary login-submit google-submit" disabled={disabled} type="button" onClick={handleGoogleLogin}>
+              <span>{copy.login.googleSubmit}</span>
+              <Icon type="external" />
+            </button>
+          </form>
+          <details className="admin-login">
+            <summary>{copy.login.adminLoginTitle}</summary>
+            <p>{copy.login.adminLoginSummary}</p>
+            <form className="admin-login-fields" onSubmit={handlePasswordSubmit}>
+              <label>
+                <span>{copy.login.passwordLabel}</span>
+                <input
+                  autoComplete="current-password"
+                  disabled={disabled}
+                  name="password"
+                  required
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </label>
+              <button className="button button-secondary login-submit" disabled={disabled || !email || !password} type="submit">
+                <span>{submitting ? copy.login.submitting : copy.login.submit}</span>
+              </button>
+            </form>
+          </details>
+        </div>
 
         <aside className="login-status content-card">
           <span className={`status-pill status-${user ? 'ready' : 'preview'}`}>
@@ -911,6 +1072,10 @@ function LoginPage({ lang }) {
                 <div>
                   <dt>{copy.login.roleLabel}</dt>
                   <dd>{user.role}</dd>
+                </div>
+                <div>
+                  <dt>{copy.login.providerLabel}</dt>
+                  <dd>{user.authProvider}</dd>
                 </div>
               </dl>
               <button className="button button-secondary login-submit" disabled={submitting} type="button" onClick={handleLogout}>
