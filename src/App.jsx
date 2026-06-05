@@ -1,9 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { desktopInstallers, externalLinks, githubUrl, languages, routeMap, siteUrl } from './site-data';
 
-const pageOrder = ['home', 'download', 'documents', 'news', 'market'];
-const routeOrder = ['home', 'download', 'documents', 'news', 'market', 'login', 'authFailure'];
+const pageOrder = ['home', 'documents', 'news', 'market', 'download'];
+const routeOrder = [
+  'home',
+  'download',
+  'documents',
+  'news',
+  'market',
+  'login',
+  'profile',
+  'adminLogin',
+  'admin',
+  'authFailure',
+];
 const themeModes = ['auto', 'light', 'dark'];
 const themeStorageKey = 'zenmind:theme';
 const downloadCountStoragePrefix = 'zenmind:download-counted:';
@@ -182,6 +193,43 @@ function useDownloadTotals() {
   return { totals, incrementLocalTotal };
 }
 
+function useAuthSession() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await apiRequest('/auth/me');
+      setUser(data.user || null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    setError('');
+    try {
+      await apiRequest('/auth/logout', { method: 'POST', body: '{}' });
+      setUser(null);
+      return true;
+    } catch (err) {
+      setError(err.message || 'Logout failed.');
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { user, setUser, loading, error, refresh, logout };
+}
+
 function useThemeMode() {
   const [mode, setModeState] = useState(readStoredThemeMode);
 
@@ -356,6 +404,27 @@ function Icon({ type }) {
         <path d="M5 21h14" />
       </>
     ),
+    monitor: (
+      <>
+        <rect x="3" y="4" width="18" height="13" rx="2" />
+        <path d="M8 21h8" />
+        <path d="M12 17v4" />
+      </>
+    ),
+    sun: (
+      <>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2" />
+        <path d="M12 20v2" />
+        <path d="m4.93 4.93 1.41 1.41" />
+        <path d="m17.66 17.66 1.41 1.41" />
+        <path d="M2 12h2" />
+        <path d="M20 12h2" />
+        <path d="m6.34 17.66-1.41 1.41" />
+        <path d="m19.07 4.93-1.41 1.41" />
+      </>
+    ),
+    moon: <path d="M20 14.5A7.2 7.2 0 0 1 9.5 4a7.8 7.8 0 1 0 10.5 10.5Z" />,
   };
 
   return (
@@ -363,6 +432,15 @@ function Icon({ type }) {
       {paths[type]}
     </svg>
   );
+}
+
+function accountInitial(user) {
+  const source = user?.email || user?.name || 'Z';
+  return source.trim().slice(0, 1).toUpperCase();
+}
+
+function isAdminUser(user) {
+  return user?.role === 'admin' || user?.role === 'administrator';
 }
 
 function CopyButton({ text, lang }) {
@@ -403,8 +481,33 @@ function ButtonLink({ href, label, variant = 'primary', external = false }) {
   );
 }
 
+function isExternalHref(href) {
+  return /^https?:\/\//.test(href);
+}
+
+function CardActionLink({ href, children, className = 'card-link' }) {
+  if (isExternalHref(href)) {
+    return (
+      <a className={className} href={href} rel="noreferrer" target="_blank">
+        {children}
+      </a>
+    );
+  }
+
+  return (
+    <Link className={className} to={href}>
+      {children}
+    </Link>
+  );
+}
+
 function ThemeSegment({ lang, mode, setMode, compact = false }) {
   const labels = languages[lang].theme;
+  const icons = {
+    auto: 'monitor',
+    light: 'sun',
+    dark: 'moon',
+  };
 
   return (
     <div className={`theme-segment${compact ? ' is-compact' : ''}`} role="group" aria-label={labels.label}>
@@ -413,17 +516,119 @@ function ThemeSegment({ lang, mode, setMode, compact = false }) {
           key={themeMode}
           className={`theme-option${mode === themeMode ? ' is-active' : ''}`}
           type="button"
+          aria-label={labels[themeMode]}
           aria-pressed={mode === themeMode}
+          title={labels[themeMode]}
           onClick={() => setMode(themeMode)}
         >
-          {labels[themeMode]}
+          <Icon type={icons[themeMode]} />
         </button>
       ))}
     </div>
   );
 }
 
-function Header({ lang, pageKey, theme }) {
+function AccountMenu({ lang, auth }) {
+  const copy = languages[lang];
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!auth.user) {
+      setOpen(false);
+    }
+  }, [auth.user]);
+
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const handlePointerDown = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [open]);
+
+  if (!auth.user) {
+    return (
+      <NavLink className="login-link" to={pathFor(lang, 'login')}>
+        {copy.nav.login}
+      </NavLink>
+    );
+  }
+
+  const initial = accountInitial(auth.user);
+  const accountLabel = auth.user.email || auth.user.name || copy.shared.currentAccount;
+
+  return (
+    <div className="account-menu" ref={menuRef}>
+      <button
+        className="account-trigger"
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label={copy.shared.currentAccount}
+        onClick={() => setOpen((value) => !value)}
+      >
+        {initial}
+      </button>
+      {open ? (
+        <div className="account-popover" role="menu">
+          <div className="account-summary">
+            <span>{copy.shared.currentAccount}</span>
+            <strong>{accountLabel}</strong>
+          </div>
+          <a
+            className="account-menu-item"
+            href={pathFor(lang, 'profile')}
+            rel="noopener noreferrer"
+            role="menuitem"
+            target="_blank"
+          >
+            {copy.shared.openProfile}
+          </a>
+          <button
+            className="account-menu-item"
+            role="menuitem"
+            type="button"
+            onClick={async () => {
+              const loggedOut = await auth.logout();
+              if (loggedOut) {
+                setOpen(false);
+              }
+            }}
+          >
+            {copy.shared.logout}
+          </button>
+          {auth.error ? <p className="account-error">{auth.error}</p> : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Header({ lang, pageKey, theme, auth }) {
   const copy = languages[lang];
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
@@ -457,9 +662,7 @@ function Header({ lang, pageKey, theme }) {
         <NavLink className="language-switch" to={alternatePath(lang, pageKey)}>
           {copy.switchLabel}
         </NavLink>
-        <NavLink className="login-link" to={pathFor(lang, 'login')}>
-          {copy.nav.login}
-        </NavLink>
+        <AccountMenu auth={auth} lang={lang} />
         <button
           className="menu-button"
           type="button"
@@ -483,9 +686,26 @@ function Header({ lang, pageKey, theme }) {
             {copy.nav[key]}
           </NavLink>
         ))}
-        <NavLink className="mobile-link" to={pathFor(lang, 'login')}>
-          {copy.nav.login}
-        </NavLink>
+        {auth.user ? (
+          <>
+            <a
+              className="mobile-link"
+              href={pathFor(lang, 'profile')}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {copy.shared.openProfile}
+            </a>
+            <button className="mobile-link mobile-action" type="button" onClick={auth.logout}>
+              {copy.shared.logout}
+            </button>
+            {auth.error ? <p className="mobile-menu-error">{auth.error}</p> : null}
+          </>
+        ) : (
+          <NavLink className="mobile-link" to={pathFor(lang, 'login')}>
+            {copy.nav.login}
+          </NavLink>
+        )}
         <a className="mobile-link" href={githubUrl} rel="noreferrer" target="_blank">
           {copy.nav.github}
         </a>
@@ -498,7 +718,7 @@ function Header({ lang, pageKey, theme }) {
   );
 }
 
-function DesktopDownload({ lang }) {
+function DesktopDownload({ lang, compact = false }) {
   const detectedPlatform = useDetectedDesktopPlatform();
   const copy = languages[lang];
   const { totals, incrementLocalTotal } = useDownloadTotals();
@@ -530,7 +750,7 @@ function DesktopDownload({ lang }) {
   };
 
   return (
-    <div className={`download-panel${selectedInstaller.available ? '' : ' is-unavailable'}`} data-reveal>
+    <div className={`download-panel${compact ? ' is-compact' : ''}${selectedInstaller.available ? '' : ' is-unavailable'}`} data-reveal>
       {selectedInstaller.available ? (
         <>
           <a className="download-primary" href={selectedInstaller.href} download onClick={handleDownloadClick}>
@@ -627,6 +847,100 @@ function HeroStats({ lang }) {
   );
 }
 
+function HeroProductPreview({ lang }) {
+  const copy = languages[lang].home;
+  const previewItems = copy.capabilityCards.slice(0, 4);
+
+  return (
+    <aside className="hero-product-preview" data-reveal aria-label={copy.featuresTitle}>
+      <div className="desktop-preview-window">
+        <div className="visual-window-top">
+          <span />
+          <span />
+          <span />
+          <strong>ZenMind Desktop</strong>
+        </div>
+        <div className="desktop-preview-body">
+          <div className="desktop-preview-nav" aria-hidden="true">
+            {previewItems.map((item) => (
+              <span key={item.key}>{item.title}</span>
+            ))}
+          </div>
+          <div className="desktop-preview-main">
+            {previewItems.map((item, index) => (
+              <article className={index === 0 ? 'is-active' : ''} key={item.key}>
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function HomePortalSection({ lang, auth }) {
+  const copy = languages[lang].home;
+  const entries = copy.portalEntries.map((entry) => {
+    if (entry.key !== 'profile') {
+      return entry;
+    }
+
+    return {
+      ...entry,
+      href: auth.user ? pathFor(lang, 'profile') : pathFor(lang, 'login'),
+      title: auth.user ? entry.title : languages[lang].nav.login,
+    };
+  });
+
+  return (
+    <section className="home-portal-section">
+      <div className="section-heading home-section-heading" data-reveal>
+        <p className="eyebrow">{copy.portalEyebrow}</p>
+        <h2>{copy.portalTitle}</h2>
+        <p>{copy.portalIntro}</p>
+      </div>
+      <div className="home-portal-grid">
+        {entries.map((entry) => (
+          <article className="content-card home-portal-card" data-reveal key={entry.key}>
+            <span className="card-kicker">{entry.key}</span>
+            <h3>{entry.title}</h3>
+            <p>{entry.body}</p>
+            <CardActionLink href={entry.href}>
+              {entry.title}
+              <Icon type="arrow" />
+            </CardActionLink>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HomeCapabilitySection({ lang }) {
+  const copy = languages[lang].home;
+
+  return (
+    <section className="home-capability-section">
+      <div className="section-heading home-section-heading" data-reveal>
+        <p className="eyebrow">{copy.featuresEyebrow}</p>
+        <h2>{copy.featuresTitle}</h2>
+        <p>{copy.featuresIntro}</p>
+      </div>
+      <div className="home-capability-grid">
+        {copy.capabilityCards.map((card, index) => (
+          <article className="content-card home-capability-card" data-reveal key={card.key}>
+            <span className="story-index">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{card.title}</h3>
+            <p>{card.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function FeatureStory({ lang }) {
   const copy = languages[lang].home;
 
@@ -657,39 +971,48 @@ function FeatureStory({ lang }) {
   );
 }
 
-function HomePage({ lang }) {
+function HomePage({ lang, auth }) {
   const copy = languages[lang];
+  const authHref = auth.user ? pathFor(lang, 'profile') : pathFor(lang, 'login');
+  const authLabel = auth.user ? copy.shared.openProfile : copy.home.secondaryCta;
 
   return (
     <>
       <section className="hero">
-        <div className="hero-copy" data-reveal>
-          <img className="hero-logo" src="/zenmind-logo.svg" alt="" />
-          <h1>{copy.home.headline}</h1>
-        </div>
+        <div className="hero-main">
+          <div className="hero-copy" data-reveal>
+            <p className="eyebrow">{copy.home.eyebrow}</p>
+            <h1>{copy.home.headline}</h1>
+            <p>{copy.home.heroIntro}</p>
+          </div>
 
-        <DesktopDownload lang={lang} />
+          <div className="hero-actions" data-reveal>
+            <DesktopDownload compact lang={lang} />
+            <ButtonLink href={pathFor(lang, 'documents')} label={copy.home.primaryCta} variant="secondary" />
+            <ButtonLink href={authHref} label={authLabel} variant="secondary" />
+          </div>
 
-        <div className="hero-actions" data-reveal>
-          <ButtonLink href={pathFor(lang, 'documents')} label={copy.home.primaryCta} />
-          <ButtonLink href={externalLinks.github} label={copy.home.secondaryCta} variant="secondary" external />
-        </div>
-
-        <div className="hero-lower">
           <HeroStats lang={lang} />
-          <RuntimeConsole lang={lang} />
         </div>
+
+        <HeroProductPreview lang={lang} />
       </section>
 
-      <FeatureStory lang={lang} />
+      <HomePortalSection auth={auth} lang={lang} />
+
+      <HomeCapabilitySection lang={lang} />
 
       <section className="final-cta" data-reveal>
         <div>
-          <p className="eyebrow">{copy.shared.deployDocs}</p>
+          <p className="eyebrow">{copy.shared.downloadDesktop}</p>
           <h2>{copy.home.finalCtaTitle}</h2>
           <p>{copy.home.finalCtaBody}</p>
         </div>
-        <ButtonLink href={externalLinks.deployDocs} label={copy.shared.deployDocs} external />
+        <div className="final-cta-actions">
+          <ButtonLink href={pathFor(lang, 'download')} label={copy.shared.downloadDesktop} />
+          <ButtonLink href={pathFor(lang, 'documents')} label={copy.nav.documents} variant="secondary" />
+          <ButtonLink href={pathFor(lang, 'market')} label={copy.nav.market} variant="secondary" />
+        </div>
       </section>
     </>
   );
@@ -705,23 +1028,140 @@ function PageHeader({ eyebrow, title, intro }) {
   );
 }
 
+function PlaceholderPage({ lang, pageKey }) {
+  const copy = languages[lang];
+  const pageCopy = copy[pageKey] || {};
+  const fallbackLabel = copy.nav[pageKey] || pageKey;
+  const eyebrow = pageCopy.eyebrow || fallbackLabel;
+  const title = pageCopy.title || fallbackLabel;
+  const intro = pageCopy.intro || fallbackLabel;
+
+  return (
+    <section className="page-section">
+      <PageHeader eyebrow={eyebrow} title={title} intro={intro} />
+    </section>
+  );
+}
+
+function UsageMetricCard({ label, value, note }) {
+  return (
+    <article className="usage-metric-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {note ? <small>{note}</small> : null}
+    </article>
+  );
+}
+
+function UsagePlaceholderChart({ title, copy }) {
+  return (
+    <article className="usage-chart-card content-card">
+      <h2>{title}</h2>
+      <div className="usage-bars" aria-hidden="true">
+        {[42, 68, 36, 74, 52, 60, 46].map((height, index) => (
+          <span key={`${title}-${index}`} style={{ '--bar-height': `${height}%` }} />
+        ))}
+      </div>
+      <p>{copy.shared.usagePreparing}</p>
+    </article>
+  );
+}
+
+function AccountOverview({ lang, user }) {
+  const copy = languages[lang];
+
+  return (
+    <article className="content-card account-overview-card">
+      <h2>{copy.profile.accountTitle}</h2>
+      <dl>
+        <div>
+          <dt>{copy.profile.fields.email}</dt>
+          <dd>{user.email}</dd>
+        </div>
+        <div>
+          <dt>{copy.profile.fields.provider}</dt>
+          <dd>{user.authProvider || '-'}</dd>
+        </div>
+        <div>
+          <dt>{copy.profile.fields.role}</dt>
+          <dd>{user.role || '-'}</dd>
+        </div>
+        <div>
+          <dt>{copy.profile.fields.status}</dt>
+          <dd>{copy.login.signedIn}</dd>
+        </div>
+      </dl>
+    </article>
+  );
+}
+
+function DocSection({ section, copy }) {
+  return (
+    <section className="docs-section" data-reveal>
+      <div className="subsection-heading">
+        <span className="card-kicker">{copy.documents.sectionLabel}</span>
+        <h2>{section.title}</h2>
+        <p>{section.intro}</p>
+      </div>
+      <div className="docs-section-grid">
+        {section.cards.map((card) => (
+          <article className="content-card doc-card" key={card.title}>
+            <div className="doc-card-top">
+              <span className="card-kicker">{card.audience}</span>
+              <span className={`status-pill status-${card.status}`}>{statusLabel(card.status, copy)}</span>
+            </div>
+            <h2>{card.title}</h2>
+            <p>{card.body}</p>
+            <CardActionLink href={card.href}>
+              {copy.documents.actionLabel}
+              <Icon type="arrow" />
+            </CardActionLink>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function DocumentsPage({ lang }) {
   const copy = languages[lang];
 
   return (
-    <section className="page-section">
+    <section className="page-section docs-page">
       <PageHeader eyebrow={copy.documents.eyebrow} title={copy.documents.title} intro={copy.documents.intro} />
-      <div className="card-grid">
-        {copy.documents.cards.map((card) => (
-          <a className="content-card doc-card" href={card.href} key={card.title} rel="noreferrer" target="_blank" data-reveal>
-            <span className="card-kicker">{copy.shared.readDocs}</span>
-            <h2>{card.title}</h2>
-            <p>{card.body}</p>
-            <span className="card-link">
-              {copy.shared.externalLabel}
-              <Icon type="external" />
-            </span>
-          </a>
+      <div className="docs-stack">
+        {copy.documents.docSections.map((section) => (
+          <DocSection copy={copy} key={section.title} section={section} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function NewsSection({ title, intro, entries, copy, variant }) {
+  return (
+    <section className={`news-section news-section-${variant}`} data-reveal>
+      <div className="subsection-heading">
+        <span className="card-kicker">{copy.news.eyebrow}</span>
+        <h2>{title}</h2>
+        <p>{intro}</p>
+      </div>
+      <div className="news-section-grid">
+        {entries.map((entry) => (
+          <article className="content-card news-card" key={entry.title}>
+            <div className="news-card-top">
+              <span className="card-kicker">{entry.phase}</span>
+              {entry.status ? <span className={`status-pill status-${entry.status}`}>{statusLabel(entry.status, copy)}</span> : null}
+            </div>
+            <h2>{entry.title}</h2>
+            <p>{entry.body}</p>
+            {entry.href ? (
+              <a className="card-link" href={entry.href} rel="noreferrer" target="_blank">
+                {copy.news.sourceLabel}: {entry.source}
+                <Icon type="external" />
+              </a>
+            ) : null}
+          </article>
         ))}
       </div>
     </section>
@@ -732,18 +1172,23 @@ function NewsPage({ lang }) {
   const copy = languages[lang];
 
   return (
-    <section className="page-section">
+    <section className="page-section news-page">
       <PageHeader eyebrow={copy.news.eyebrow} title={copy.news.title} intro={copy.news.intro} />
-      <div className="timeline">
-        {copy.news.entries.map((entry) => (
-          <article className="timeline-item" key={entry.title} data-reveal>
-            <span>{entry.phase}</span>
-            <div>
-              <h2>{entry.title}</h2>
-              <p>{entry.body}</p>
-            </div>
-          </article>
-        ))}
+      <div className="news-stack">
+        <NewsSection
+          copy={copy}
+          entries={copy.news.productUpdates}
+          intro={copy.news.productIntro}
+          title={copy.news.productTitle}
+          variant="product"
+        />
+        <NewsSection
+          copy={copy}
+          entries={copy.news.industryTrends}
+          intro={copy.news.industryIntro}
+          title={copy.news.industryTitle}
+          variant="industry"
+        />
       </div>
     </section>
   );
@@ -761,104 +1206,197 @@ function statusLabel(status, copy) {
   return copy.shared.statusSoon;
 }
 
+function MarketCategorySection({ category, copy }) {
+  return (
+    <article className="content-card market-card" data-reveal>
+      <div className="market-card-top">
+        <div>
+          <span className="card-kicker">{category.key}</span>
+          <h2>{category.title}</h2>
+        </div>
+        <span className={`status-pill status-${category.status}`}>{statusLabel(category.status, copy)}</span>
+      </div>
+      <p>{category.body}</p>
+      <div className="market-tag-list" aria-label={copy.market.taskLabel}>
+        {category.taskTags.map((tag) => (
+          <span key={tag}>{tag}</span>
+        ))}
+      </div>
+      <ul>
+        {category.items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+      <CardActionLink className="button button-secondary market-action" href={category.href}>
+        <span>{copy.market.actionLabel}</span>
+        <Icon type="arrow" />
+      </CardActionLink>
+    </article>
+  );
+}
+
 function MarketPage({ lang }) {
   const copy = languages[lang];
 
   return (
-    <section className="page-section">
+    <section className="page-section market-page">
       <PageHeader eyebrow={copy.market.eyebrow} title={copy.market.title} intro={copy.market.intro} />
+      <div className="subsection-heading market-overview-heading" data-reveal>
+        <span className="card-kicker">{copy.market.sectionLabel}</span>
+        <h2>{copy.market.title}</h2>
+      </div>
       <div className="market-grid">
         {copy.market.categories.map((category) => (
-          <article className="content-card market-card" key={category.title} data-reveal>
-            <div className="market-card-top">
-              <h2>{category.title}</h2>
-              <span className={`status-pill status-${category.status}`}>{statusLabel(category.status, copy)}</span>
-            </div>
-            <p>{category.body}</p>
-            <ul>
-              {category.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </article>
+          <MarketCategorySection category={category} copy={copy} key={category.key} />
         ))}
       </div>
     </section>
   );
 }
 
-function DownloadVisual({ title, rows, status }) {
+function PlatformDownloadCard({ installer, lang, recommended = false, onDownload }) {
+  const copy = languages[lang];
+  const localized = installer[lang];
+  const status = installer.available ? 'ready' : 'soon';
+
   return (
-    <div className="download-visual" aria-hidden="true">
-      <div className="visual-window">
-        <div className="visual-window-top">
-          <span />
-          <span />
-          <span />
-          <strong>{title}</strong>
+    <article className={`platform-card content-card${recommended ? ' is-recommended' : ''}`} data-reveal>
+      <div className="platform-card-top">
+        <div>
+          <span className="card-kicker">{localized.label}</span>
+          <h2>{installer.name}</h2>
         </div>
-        <div className="visual-window-body">
-          {rows.map((row, index) => (
-            <div className="visual-row" key={row}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
-              <strong>{row}</strong>
-            </div>
-          ))}
+        <div className="platform-badges">
+          {recommended ? <span className="status-pill status-preview">{copy.download.recommendedBadge}</span> : null}
+          <span className={`status-pill status-${status}`}>{installer.available ? copy.shared.statusReady : copy.shared.statusSoon}</span>
         </div>
       </div>
-      {status ? <span className="download-soon-badge">{status}</span> : null}
-    </div>
+      <p>{localized.summary}</p>
+      <div className="platform-meta">
+        {installer.version ? <span>v{installer.version}</span> : null}
+        {localized.meta.map((item) => (
+          <span key={item}>{item}</span>
+        ))}
+      </div>
+      <div className="platform-note">
+        <strong>{copy.download.detailsLabel}</strong>
+        <p>{localized.note}</p>
+      </div>
+      {installer.available ? (
+        <a className="button button-primary platform-action" download href={installer.href} onClick={() => onDownload(installer.key)}>
+          <Icon type="download" />
+          <span>{localized.button}</span>
+        </a>
+      ) : (
+        <Link className="button button-secondary platform-action" to={pathFor(lang, 'documents')}>
+          <span>{copy.shared.downloadFallback}</span>
+          <Icon type="arrow" />
+        </Link>
+      )}
+    </article>
+  );
+}
+
+function DownloadRecommendation({ lang, installer, onDownload }) {
+  const copy = languages[lang];
+  const localized = installer?.[lang];
+
+  if (!installer || !localized || !installer.available) {
+    return (
+      <article className="download-recommendation content-card" data-reveal>
+        <div>
+          <span className="card-kicker">{copy.download.recommendation.eyebrow}</span>
+          <h2>{copy.download.recommendation.unavailableTitle}</h2>
+          <p>{copy.download.recommendation.unavailableBody}</p>
+        </div>
+        <div className="download-recommendation-actions">
+          <Link className="button button-primary" to={pathFor(lang, 'documents')}>
+            <span>{copy.download.docsCta}</span>
+            <Icon type="arrow" />
+          </Link>
+          <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
+            <span>{copy.download.sourceCta}</span>
+            <Icon type="external" />
+          </a>
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="download-recommendation content-card" data-reveal>
+      <div>
+        <span className="card-kicker">{copy.download.recommendation.eyebrow}</span>
+        <h2>
+          {copy.download.recommendation.titlePrefix} {localized.label}
+        </h2>
+        <p>{localized.summary}</p>
+      </div>
+      <a className="button button-primary" download href={installer.href} onClick={() => onDownload(installer.key)}>
+        <Icon type="download" />
+        <span>{localized.button}</span>
+      </a>
+    </article>
   );
 }
 
 function DownloadPage({ lang }) {
   const copy = languages[lang];
   const downloadCopy = copy.download;
-  const availableDesktopInstallers = desktopInstallers.filter((installer) => installer.available);
+  const detectedPlatform = useDetectedDesktopPlatform();
+  const recommendedInstaller = desktopInstallers.find((installer) => installer.key === detectedPlatform);
+
+  const handleInstallerDownload = (installerKey) => {
+    if (hasCountedDownload(installerKey)) {
+      return;
+    }
+    markDownloadCounted(installerKey);
+    recordDownloadEvent(installerKey);
+  };
 
   return (
     <section className="page-section download-page">
       <PageHeader eyebrow={downloadCopy.eyebrow} title={downloadCopy.title} intro={downloadCopy.intro} />
 
       <div className="download-stack">
-        <article className="download-section content-card" data-reveal>
-          <div className="download-card">
-            <div>
-              <span className="card-kicker">{downloadCopy.desktop.eyebrow}</span>
-              <h2>{downloadCopy.desktop.title}</h2>
-              <p>{downloadCopy.desktop.intro}</p>
-              <div className="download-actions">
-                {availableDesktopInstallers.map((installer) => {
-                  const localized = installer[lang];
+        <DownloadRecommendation installer={recommendedInstaller} lang={lang} onDownload={handleInstallerDownload} />
 
-                  return (
-                    <a className="button button-primary" href={installer.href} download key={installer.key}>
-                      <Icon type="download" />
-                      <span>{localized.button}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-            <DownloadVisual title={downloadCopy.desktop.visualTitle} rows={downloadCopy.desktop.visualRows} />
+        <section className="download-platforms" data-reveal>
+          <div className="download-section-heading">
+            <span className="card-kicker">{downloadCopy.desktop.eyebrow}</span>
+            <h2>{downloadCopy.platformsTitle}</h2>
           </div>
-        </article>
+          <div className="platform-download-grid">
+            {desktopInstallers.map((installer) => (
+              <PlatformDownloadCard
+                installer={installer}
+                key={installer.key}
+                lang={lang}
+                recommended={installer.key === recommendedInstaller?.key}
+                onDownload={handleInstallerDownload}
+              />
+            ))}
+          </div>
+        </section>
 
-        <article className="download-section content-card is-mobile" data-reveal>
-          <div className="download-card">
-            <div>
-              <span className="card-kicker">{downloadCopy.mobile.eyebrow}</span>
-              <div className="download-title-row">
-                <h2>{downloadCopy.mobile.title}</h2>
-                <span className="status-pill status-soon">{downloadCopy.mobile.status}</span>
-              </div>
-              <p>{downloadCopy.mobile.intro}</p>
+        <article className="download-mobile-note content-card" data-reveal>
+          <div>
+            <span className="card-kicker">{downloadCopy.mobile.eyebrow}</span>
+            <div className="download-title-row">
+              <h2>{downloadCopy.mobile.title}</h2>
+              <span className="status-pill status-soon">{downloadCopy.mobile.status}</span>
             </div>
-            <DownloadVisual
-              status={downloadCopy.mobile.status}
-              title={downloadCopy.mobile.visualTitle}
-              rows={downloadCopy.mobile.visualRows}
-            />
+            <p>{downloadCopy.mobile.intro}</p>
+          </div>
+          <div className="download-recommendation-actions">
+            <Link className="button button-secondary" to={pathFor(lang, 'documents')}>
+              <span>{copy.download.docsCta}</span>
+              <Icon type="arrow" />
+            </Link>
+            <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
+              <span>{copy.download.sourceCta}</span>
+              <Icon type="external" />
+            </a>
           </div>
         </article>
       </div>
@@ -866,42 +1404,194 @@ function DownloadPage({ lang }) {
   );
 }
 
-function LoginPage({ lang }) {
+function SignedInPanel({ lang, auth }) {
+  const copy = languages[lang];
+  const user = auth.user;
+
+  return (
+    <article className="login-form content-card login-minimal-card signed-in-panel">
+      <span className="status-pill status-ready">{copy.login.signedIn}</span>
+      <h2>{copy.login.welcome}</h2>
+      <dl>
+        <div>
+          <dt>{copy.login.accountLabel}</dt>
+          <dd>{user.email}</dd>
+        </div>
+        <div>
+          <dt>{copy.login.roleLabel}</dt>
+          <dd>{user.role}</dd>
+        </div>
+        <div>
+          <dt>{copy.login.providerLabel}</dt>
+          <dd>{user.authProvider}</dd>
+        </div>
+      </dl>
+      {auth.error ? <p className="login-error">{auth.error}</p> : null}
+      <div className="login-panel-actions">
+        <a className="button button-primary" href={pathFor(lang, 'profile')} rel="noopener noreferrer" target="_blank">
+          <span>{copy.login.profileCta}</span>
+          <Icon type="external" />
+        </a>
+        <Link className="button button-secondary" to={pathFor(lang, 'home')}>
+          <span>{copy.login.homeCta}</span>
+          <Icon type="arrow" />
+        </Link>
+        <button className="button button-secondary" type="button" onClick={auth.logout}>
+          <span>{copy.login.logout}</span>
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function ProfilePage({ lang, auth }) {
+  const copy = languages[lang];
+  const user = auth.user;
+
+  if (auth.loading) {
+    return (
+      <section className="page-section profile-page">
+        <PageHeader eyebrow={copy.profile.eyebrow} title={copy.profile.title} intro={copy.login.checking} />
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section className="page-section profile-page">
+        <PageHeader eyebrow={copy.profile.eyebrow} title={copy.profile.loginPromptTitle} intro={copy.profile.loginPromptBody} />
+        <Link className="button button-primary" to={pathFor(lang, 'login')}>
+          <span>{copy.profile.signInCta}</span>
+          <Icon type="arrow" />
+        </Link>
+      </section>
+    );
+  }
+
+  return (
+    <section className="page-section profile-page">
+      <PageHeader eyebrow={copy.profile.eyebrow} title={copy.profile.title} intro={copy.profile.intro} />
+      <div className="profile-dashboard" data-reveal>
+        <AccountOverview lang={lang} user={user} />
+
+        <article className="content-card usage-summary-card">
+          <div className="profile-section-top">
+            <div>
+              <h2>{copy.profile.usageTitle}</h2>
+              <p>{copy.shared.usagePreparing}</p>
+            </div>
+            <span className="status-pill status-preview">{copy.shared.statusPreview}</span>
+          </div>
+          <div className="usage-metric-grid">
+            <UsageMetricCard label={copy.profile.metrics.calls} value={copy.profile.emptyMetric} />
+            <UsageMetricCard label={copy.profile.metrics.tokens} value={copy.profile.emptyMetric} />
+            <UsageMetricCard label={copy.profile.metrics.cost} value={copy.profile.emptyMetric} />
+            <UsageMetricCard label={copy.profile.metrics.recentModel} value={copy.profile.emptyMetric} />
+          </div>
+        </article>
+
+        <UsagePlaceholderChart title={copy.profile.trendsTitle} copy={copy} />
+        <UsagePlaceholderChart title={copy.profile.providersTitle} copy={copy} />
+
+        <article className="content-card profile-settings-card">
+          <h2>{copy.profile.settingsTitle}</h2>
+          <p>{copy.profile.settingsBody}</p>
+          <div className="profile-actions">
+            <Link className="button button-primary" to={pathFor(lang, 'download')}>
+              <Icon type="download" />
+              <span>{copy.shared.downloadDesktop}</span>
+            </Link>
+            <Link className="button button-secondary" to={pathFor(lang, 'documents')}>
+              <span>{copy.shared.readDocs}</span>
+              <Icon type="arrow" />
+            </Link>
+            <button className="button button-secondary" type="button" onClick={auth.logout}>
+              <span>{copy.shared.logout}</span>
+            </button>
+          </div>
+          {auth.error ? <p className="profile-error">{auth.error}</p> : null}
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function AdminPage({ lang, auth }) {
+  const copy = languages[lang];
+  const empty = copy.profile.emptyMetric;
+
+  if (auth.loading) {
+    return (
+      <section className="page-section admin-page">
+        <PageHeader eyebrow={copy.admin.eyebrow} title={copy.admin.title} intro={copy.login.checking} />
+      </section>
+    );
+  }
+
+  if (!auth.user) {
+    return (
+      <section className="page-section admin-page">
+        <PageHeader eyebrow={copy.admin.loginRequiredTitle} title={copy.admin.loginRequiredTitle} intro={copy.admin.loginRequiredBody} />
+        <Link className="button button-primary" to={pathFor(lang, 'adminLogin')}>
+          <span>{copy.admin.loginCta}</span>
+          <Icon type="arrow" />
+        </Link>
+      </section>
+    );
+  }
+
+  if (!isAdminUser(auth.user)) {
+    return (
+      <section className="page-section admin-page">
+        <PageHeader eyebrow={copy.admin.noPermissionTitle} title={copy.admin.noPermissionTitle} intro={copy.admin.noPermissionBody} />
+      </section>
+    );
+  }
+
+  return (
+    <section className="page-section admin-page">
+      <PageHeader eyebrow={copy.admin.eyebrow} title={copy.admin.title} intro={copy.admin.intro} />
+      <div className="admin-dashboard" data-reveal>
+        <article className="content-card admin-overview-card">
+          <div className="profile-section-top">
+            <div>
+              <h2>{copy.admin.overviewTitle}</h2>
+            </div>
+            <span className="status-pill status-preview">{copy.shared.usagePreparing}</span>
+          </div>
+          <div className="usage-metric-grid admin-metric-grid">
+            <UsageMetricCard label={copy.admin.metrics.calls} value={empty} />
+            <UsageMetricCard label={copy.admin.metrics.tokens} value={empty} />
+            <UsageMetricCard label={copy.admin.metrics.cost} value={empty} />
+            <UsageMetricCard label={copy.admin.metrics.users} value={empty} />
+            <UsageMetricCard label={copy.admin.metrics.downloads} value={empty} />
+            <UsageMetricCard label={copy.admin.metrics.providers} value={empty} />
+          </div>
+        </article>
+
+        <UsagePlaceholderChart title={copy.admin.trendsTitle} copy={copy} />
+        <UsagePlaceholderChart title={copy.admin.metrics.providers} copy={copy} />
+
+        <article className="content-card admin-activity-card">
+          <h2>{copy.admin.activityTitle}</h2>
+          <p>{copy.shared.usagePreparing}</p>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function LoginPage({ lang, auth }) {
   const copy = languages[lang];
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let cancelled = false;
-
-    apiRequest('/auth/me')
-      .then((data) => {
-        if (!cancelled) {
-          setUser(data.user);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setUser(null);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const user = auth.user;
+  const loading = auth.loading;
 
   const disabled = loading || submitting || sendingCode || Boolean(user);
 
@@ -932,45 +1622,8 @@ function LoginPage({ lang }) {
         method: 'POST',
         body: JSON.stringify({ email, code }),
       });
-      setUser(data.user);
+      auth.setUser(data.user);
       setCode('');
-      setPassword('');
-    } catch (err) {
-      setError(err.message || copy.login.errorFallback);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handlePasswordSubmit = async (event) => {
-    event.preventDefault();
-    setError('');
-    setSubmitting(true);
-
-    try {
-      const data = await apiRequest('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
-      setUser(data.user);
-      setCode('');
-      setPassword('');
-    } catch (err) {
-      setError(err.message || copy.login.errorFallback);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    setError('');
-    setSubmitting(true);
-
-    try {
-      await apiRequest('/auth/logout', { method: 'POST', body: '{}' });
-      setUser(null);
-      setCode('');
-      setPassword('');
     } catch (err) {
       setError(err.message || copy.login.errorFallback);
     } finally {
@@ -983,17 +1636,116 @@ function LoginPage({ lang }) {
   };
 
   return (
-    <section className="page-section login-page">
-      <PageHeader eyebrow={copy.login.eyebrow} title={copy.login.title} intro={copy.login.intro} />
-      <div className="login-shell" data-reveal>
-        <div className="login-form content-card">
-          <h2>{copy.login.formTitle}</h2>
-          <form className="email-code-form" onSubmit={handleEmailCodeSubmit}>
+    <section className="page-section login-page auth-page login-atmosphere">
+      <div className="login-minimal-shell" data-reveal>
+        {user ? (
+          <SignedInPanel auth={auth} lang={lang} />
+        ) : (
+          <article className="login-form content-card login-entry-panel login-minimal-card">
+            <div>
+              <span className="card-kicker">{copy.login.eyebrow}</span>
+              <h1>{copy.login.title}</h1>
+              <p>{copy.login.intro}</p>
+            </div>
+            <form className="email-code-form" onSubmit={handleEmailCodeSubmit}>
+              <label>
+                <span>{copy.login.emailLabel}</span>
+                <input
+                  autoComplete="email"
+                  disabled={disabled}
+                  inputMode="email"
+                  name="email"
+                  required
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                />
+              </label>
+              <div className="login-code-row">
+                <label>
+                  <span>{copy.login.codeLabel}</span>
+                  <input
+                    autoComplete="one-time-code"
+                    disabled={disabled}
+                    inputMode="numeric"
+                    maxLength={6}
+                    name="code"
+                    pattern="[0-9]{6}"
+                    placeholder={copy.login.codePlaceholder}
+                    required
+                    type="text"
+                    value={code}
+                    onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  />
+                </label>
+                <button className="button button-secondary login-code-button" disabled={disabled || !email} type="button" onClick={handleSendCode}>
+                  <span>{sendingCode ? copy.login.sendingCode : codeSent ? copy.login.resendCode : copy.login.sendCode}</span>
+                </button>
+              </div>
+              {codeSent ? <p className="login-hint">{copy.login.codeSent}</p> : null}
+              {error ? <p className="login-error">{error}</p> : null}
+              <button className="button button-primary login-submit" disabled={disabled || code.length !== 6} type="submit">
+                <span>{submitting ? copy.login.verifyingCode : copy.login.verifySubmit}</span>
+                <Icon type="arrow" />
+              </button>
+            </form>
+            <div className="login-divider">
+              <span />
+              <strong>{copy.login.separator}</strong>
+              <span />
+            </div>
+            <button className="button button-secondary login-submit google-submit" disabled={disabled} type="button" onClick={handleGoogleLogin}>
+              <span>{copy.login.googleSubmit}</span>
+              <Icon type="external" />
+            </button>
+          </article>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function AdminLoginPage({ lang, auth }) {
+  const copy = languages[lang];
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setSubmitting(true);
+
+    try {
+      const data = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      });
+      auth.setUser(data.user);
+      window.location.assign(pathFor(lang, 'admin'));
+    } catch (err) {
+      setError(err.message || copy.adminLogin.errorFallback);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="page-section login-page auth-page admin-login-page login-atmosphere">
+      <div className="login-minimal-shell admin-login-minimal-shell" data-reveal>
+        <article className="login-form content-card login-entry-panel login-minimal-card admin-login-minimal-card">
+          <div>
+            <span className="card-kicker">{copy.adminLogin.eyebrow}</span>
+            <h1>{copy.adminLogin.title}</h1>
+            <p>{copy.adminLogin.intro}</p>
+          </div>
+          <form className="email-code-form" onSubmit={handleSubmit}>
             <label>
-              <span>{copy.login.emailLabel}</span>
+              <span>{copy.adminLogin.emailLabel}</span>
               <input
                 autoComplete="email"
-                disabled={disabled}
+                disabled={submitting}
                 inputMode="email"
                 name="email"
                 required
@@ -1002,94 +1754,26 @@ function LoginPage({ lang }) {
                 onChange={(event) => setEmail(event.target.value)}
               />
             </label>
-            <div className="login-code-row">
-              <label>
-                <span>{copy.login.codeLabel}</span>
-                <input
-                  autoComplete="one-time-code"
-                  disabled={disabled}
-                  inputMode="numeric"
-                  maxLength={6}
-                  name="code"
-                  pattern="[0-9]{6}"
-                  placeholder={copy.login.codePlaceholder}
-                  required
-                  type="text"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-                />
-              </label>
-              <button className="button button-secondary login-code-button" disabled={disabled || !email} type="button" onClick={handleSendCode}>
-                <span>{sendingCode ? copy.login.sendingCode : codeSent ? copy.login.resendCode : copy.login.sendCode}</span>
-              </button>
-            </div>
-            {codeSent ? <p className="login-hint">{copy.login.codeSent}</p> : null}
+            <label>
+              <span>{copy.adminLogin.passwordLabel}</span>
+              <input
+                autoComplete="current-password"
+                disabled={submitting}
+                name="password"
+                required
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            </label>
             {error ? <p className="login-error">{error}</p> : null}
-            <button className="button button-primary login-submit" disabled={disabled || code.length !== 6} type="submit">
-              <span>{submitting ? copy.login.verifyingCode : copy.login.verifySubmit}</span>
+            <button className="button button-primary login-submit" disabled={submitting || !email || !password} type="submit">
+              <span>{submitting ? copy.adminLogin.submitting : copy.adminLogin.submit}</span>
               <Icon type="arrow" />
             </button>
-            <button className="button button-secondary login-submit google-submit" disabled={disabled} type="button" onClick={handleGoogleLogin}>
-              <span>{copy.login.googleSubmit}</span>
-              <Icon type="external" />
-            </button>
           </form>
-          <details className="admin-login">
-            <summary>{copy.login.adminLoginTitle}</summary>
-            <p>{copy.login.adminLoginSummary}</p>
-            <form className="admin-login-fields" onSubmit={handlePasswordSubmit}>
-              <label>
-                <span>{copy.login.passwordLabel}</span>
-                <input
-                  autoComplete="current-password"
-                  disabled={disabled}
-                  name="password"
-                  required
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
-              </label>
-              <button className="button button-secondary login-submit" disabled={disabled || !email || !password} type="submit">
-                <span>{submitting ? copy.login.submitting : copy.login.submit}</span>
-              </button>
-            </form>
-          </details>
-        </div>
-
-        <aside className="login-status content-card">
-          <span className={`status-pill status-${user ? 'ready' : 'preview'}`}>
-            {loading ? copy.login.checking : user ? copy.login.signedIn : copy.login.signedOut}
-          </span>
-          {user ? (
-            <>
-              <h2>{copy.login.welcome}</h2>
-              <dl>
-                <div>
-                  <dt>{copy.login.accountLabel}</dt>
-                  <dd>{user.email}</dd>
-                </div>
-                <div>
-                  <dt>{copy.login.roleLabel}</dt>
-                  <dd>{user.role}</dd>
-                </div>
-                <div>
-                  <dt>{copy.login.providerLabel}</dt>
-                  <dd>{user.authProvider}</dd>
-                </div>
-              </dl>
-              <button className="button button-secondary login-submit" disabled={submitting} type="button" onClick={handleLogout}>
-                <span>{copy.login.logout}</span>
-                <Icon type="arrow" />
-              </button>
-            </>
-          ) : (
-            <>
-              <h2>{copy.login.sessionTitle}</h2>
-              <p>{copy.login.sessionBody}</p>
-            </>
-          )}
-        </aside>
+          <p className="admin-security-note">{copy.adminLogin.securityNote}</p>
+        </article>
       </div>
     </section>
   );
@@ -1149,32 +1833,35 @@ function Footer({ lang }) {
   );
 }
 
-function PageLayout({ lang, pageKey, theme, children }) {
+function PageLayout({ lang, pageKey, theme, auth, children }) {
   useRevealOnScroll();
   usePageMeta(lang, pageKey);
 
   return (
     <div className="app-shell">
-      <Header lang={lang} pageKey={pageKey} theme={theme} />
+      <Header auth={auth} lang={lang} pageKey={pageKey} theme={theme} />
       <main className="content-shell">{children}</main>
       <Footer lang={lang} />
     </div>
   );
 }
 
-function RoutedPage({ lang, pageKey, theme }) {
+function RoutedPage({ lang, pageKey, theme, auth }) {
   const pages = {
-    home: <HomePage lang={lang} />,
+    home: <HomePage lang={lang} auth={auth} />,
     download: <DownloadPage lang={lang} />,
     documents: <DocumentsPage lang={lang} />,
     news: <NewsPage lang={lang} />,
     market: <MarketPage lang={lang} />,
-    login: <LoginPage lang={lang} />,
+    login: <LoginPage lang={lang} auth={auth} />,
+    profile: <ProfilePage lang={lang} auth={auth} />,
+    adminLogin: <AdminLoginPage lang={lang} auth={auth} />,
+    admin: <AdminPage lang={lang} auth={auth} />,
     authFailure: <AuthFailurePage lang={lang} />,
   };
 
   return (
-    <PageLayout lang={lang} pageKey={pageKey} theme={theme}>
+    <PageLayout auth={auth} lang={lang} pageKey={pageKey} theme={theme}>
       {pages[pageKey]}
     </PageLayout>
   );
@@ -1192,6 +1879,7 @@ function ScrollToTop() {
 
 function App() {
   const theme = useThemeMode();
+  const auth = useAuthSession();
   const routes = useMemo(
     () =>
       ['zh', 'en'].flatMap((lang) =>
@@ -1212,7 +1900,7 @@ function App() {
           <Route
             key={`${route.lang}-${route.key}`}
             path={route.path}
-            element={<RoutedPage lang={route.lang} pageKey={route.key} theme={theme} />}
+            element={<RoutedPage auth={auth} lang={route.lang} pageKey={route.key} theme={theme} />}
           />
         ))}
         <Route path="*" element={<Navigate to="/" replace />} />
