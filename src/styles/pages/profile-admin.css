@@ -1,0 +1,284 @@
+.account-menu {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.account-trigger {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--surface-strong);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.account-trigger:hover {
+  transform: translateY(-1px);
+}
+
+.account-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 5;
+  width: min(280px, calc(100vw - 24px));
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+}
+
+.account-summary {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.account-summary span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.account-summary strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.account-menu-item {
+  min-height: 38px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.account-menu-item:hover {
+  background: var(--surface-muted);
+}
+
+.account-error {
+  margin: 0;
+  color: var(--warning);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.admin-security-note {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profile-page .page-header {
+  max-width: 900px;
+}
+
+.admin-page .page-header {
+  max-width: 900px;
+}
+
+.profile-dashboard {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.admin-dashboard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-dashboard > * {
+  min-width: 0;
+}
+
+.admin-dashboard > * {
+  min-width: 0;
+}
+
+.account-overview-card dl {
+  margin: 18px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.account-overview-card dl > div {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.account-overview-card dl > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.account-overview-card dt {
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-overview-card dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.usage-summary-card {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-overview-card,
+.admin-activity-card {
+  grid-column: 1 / -1;
+}
+
+.profile-section-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.profile-section-top > div {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.profile-section-top h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.profile-section-top .status-pill {
+  flex-shrink: 0;
+}
+
+.profile-section-top p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.usage-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-metric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.usage-metric-card {
+  min-height: 128px;
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.usage-metric-card span {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.usage-metric-card strong {
+  font-size: 24px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.usage-metric-card small {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.usage-chart-card {
+  min-height: 320px;
+  display: grid;
+  gap: 18px;
+}
+
+.usage-chart-card p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.usage-bars {
+  height: 180px;
+  padding-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.usage-bars span {
+  height: var(--bar-height);
+  min-height: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, var(--border));
+  border-radius: 999px 999px 6px 6px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 84%, white) 0%, var(--accent) 100%);
+  box-shadow: 0 8px 18px rgba(19, 104, 255, 0.14);
+}
+
+.profile-settings-card {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 18px;
+}
+
+.profile-settings-card p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.profile-error {
+  margin: 14px 0 0;
+  color: #b42318;
+  font-weight: 700;
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.profile-actions .button {
+  flex: 1 1 180px;
+}

@@ -1,0 +1,185 @@
+.download-page .page-header {
+  max-width: 900px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+}
+
+.download-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.download-recommendation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 62%, transparent), transparent 48%),
+    color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+}
+
+.download-recommendation h2,
+.download-section-heading h2,
+.platform-card h2 {
+  margin: 0;
+}
+
+.download-recommendation p {
+  max-width: 680px;
+  color: var(--text-muted);
+}
+
+.download-recommendation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.download-section-heading {
+  max-width: 760px;
+}
+
+.platform-download-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.platform-card {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.platform-card.is-recommended {
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
+  box-shadow: 0 20px 50px rgba(19, 104, 255, 0.12);
+}
+
+.platform-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.platform-card p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.platform-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.platform-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.platform-meta span {
+  min-height: 30px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.platform-note {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+}
+
+.platform-note strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.platform-action {
+  justify-self: flex-start;
+}
+
+.download-mobile-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.download-section {
+  overflow: hidden;
+}
+
+.download-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
+  gap: 30px;
+  align-items: center;
+}
+
+.download-card h2 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.08;
+  font-weight: 760;
+}
+
+.download-card p {
+  margin: 16px 0 0;
+  max-width: 560px;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.download-actions {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.download-actions .button {
+  min-width: 190px;
+}
+
+.download-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.download-title-row .status-pill {
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.download-soon-badge {
+  justify-self: flex-start;
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--warning);
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 800;
+}

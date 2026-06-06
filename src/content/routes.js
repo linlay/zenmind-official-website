@@ -1,0 +1,26 @@
+export const routeMap = {
+  zh: {
+    home: '/',
+    download: '/download',
+    documents: '/documents',
+    news: '/news',
+    market: '/market',
+    login: '/login',
+    profile: '/profile',
+    adminLogin: '/admin/login',
+    admin: '/admin',
+    authFailure: '/auth/failure',
+  },
+  en: {
+    home: '/en',
+    download: '/en/download',
+    documents: '/en/documents',
+    news: '/en/news',
+    market: '/en/market',
+    login: '/en/login',
+    profile: '/en/profile',
+    adminLogin: '/en/admin/login',
+    admin: '/en/admin',
+    authFailure: '/en/auth/failure',
+  },
+};
