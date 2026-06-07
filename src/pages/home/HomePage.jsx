@@ -1,116 +1,8 @@
-import { useId, useRef, useState } from 'react';
 import { desktopInstallers, languages } from '../../content';
 import { hasCountedDownload, markDownloadCounted, recordDownloadEvent, useDownloadTotals } from '../../shared/download-tracking';
 import { useDetectedDesktopPlatform } from '../../shared/platform';
 import { pathFor } from '../../shared/routing';
 import { ButtonLink } from '../../shared/components/ButtonLink';
-
-function DesktopDownloadDropdown({ lang }) {
-  const detectedPlatform = useDetectedDesktopPlatform();
-  const copy = languages[lang];
-  const { incrementLocalTotal } = useDownloadTotals();
-  const popoverId = useId();
-  const titleId = `${popoverId}-title`;
-  const [isOpen, setIsOpen] = useState(false);
-  const pointerInteractionRef = useRef(false);
-
-  const handleBlur = (event) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      pointerInteractionRef.current = false;
-      setIsOpen(false);
-    }
-  };
-
-  const handleFocus = () => {
-    if (pointerInteractionRef.current) {
-      return;
-    }
-    setIsOpen(true);
-  };
-
-  const handleTriggerClick = () => {
-    if (pointerInteractionRef.current) {
-      setIsOpen((current) => !current);
-      pointerInteractionRef.current = false;
-      return;
-    }
-    setIsOpen(true);
-  };
-
-  const handleTriggerKeyDown = (event) => {
-    if (event.key === 'Escape') {
-      setIsOpen(false);
-      return;
-    }
-    if (event.key === 'Enter' || event.key === ' ') {
-      setIsOpen(true);
-    }
-  };
-
-  const handleDownloadClick = (installer) => {
-    if (!installer.available || hasCountedDownload(installer.key)) {
-      return;
-    }
-    markDownloadCounted(installer.key);
-    incrementLocalTotal(installer.key);
-    recordDownloadEvent(installer.key);
-  };
-
-  return (
-    <div
-      className={`desktop-download-menu${isOpen ? ' is-open' : ''}`}
-      onBlur={handleBlur}
-      onFocus={handleFocus}
-      onKeyDown={handleTriggerKeyDown}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      <button
-        aria-controls={popoverId}
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        className="button button-primary desktop-download-trigger"
-        onClick={handleTriggerClick}
-        onPointerDown={() => {
-          pointerInteractionRef.current = true;
-        }}
-        onPointerCancel={() => {
-          pointerInteractionRef.current = false;
-        }}
-        type="button"
-      >
-        <span>{copy.shared.downloadDesktop}</span>
-      </button>
-      <div className="desktop-download-popover" hidden={!isOpen} id={popoverId} aria-labelledby={titleId}>
-        <p id={titleId}>{copy.home.downloadMenuTitle}</p>
-        <div className="desktop-download-options">
-          {desktopInstallers.map((installer) => {
-            const localized = installer[lang];
-            const isCurrent = installer.key === detectedPlatform && installer.available;
-
-            return installer.available ? (
-              <a
-                className={`desktop-download-option${isCurrent ? ' is-current' : ''}`}
-                download
-                href={installer.href}
-                key={installer.key}
-                onClick={() => handleDownloadClick(installer)}
-              >
-                <span>{localized.label}</span>
-                {isCurrent ? <strong>{copy.home.currentDeviceBadge}</strong> : null}
-              </a>
-            ) : (
-              <span className="desktop-download-option is-disabled" key={installer.key}>
-                <span>{localized.label}</span>
-                <strong>{copy.home.plannedBadge}</strong>
-              </span>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function DirectDesktopDownloadButton({ lang }) {
   const detectedPlatform = useDetectedDesktopPlatform();
@@ -140,90 +32,9 @@ function DirectDesktopDownloadButton({ lang }) {
   }
 
   return (
-    <a className="button button-primary" download href={installer.href} onClick={handleClick}>
+    <a className="button button-primary hero-download-button" download href={installer.href} onClick={handleClick}>
       <span>{localized.button}</span>
     </a>
-  );
-}
-
-function HeroProductPreview({ lang }) {
-  const copy = languages[lang].home;
-  const previewItems = copy.capabilityCards.slice(0, 3);
-
-  return (
-    <aside className="hero-product-preview" data-reveal aria-label={copy.featuresTitle}>
-      <div className="desktop-preview-window">
-        <div className="visual-window-top">
-          <span />
-          <span />
-          <span />
-          <strong>ZenMind Desktop</strong>
-        </div>
-        <div className="desktop-code-preview">
-          <div className="code-editor-panel" aria-hidden="true">
-            <div className="code-editor-meta">
-              <span>agent.task.ts</span>
-              <strong>running</strong>
-            </div>
-            <pre>
-              <code>
-                <span style={{ '--code-line': 0 }}>
-                  <em>const</em> task = <strong>&quot;prepare release notes&quot;</strong>;
-                </span>
-                <span style={{ '--code-line': 1 }}>
-                  <em>await</em> desktop.openWorkspace(task);
-                </span>
-                <span style={{ '--code-line': 2 }}>
-                  agent.use([<strong>&quot;docs&quot;</strong>, <strong>&quot;models&quot;</strong>, <strong>&quot;sandbox&quot;</strong>]);
-                </span>
-                <span style={{ '--code-line': 3 }}>
-                  <em>return</em> agent.run({`{`} visible: <strong>true</strong> {`}`});
-                </span>
-              </code>
-            </pre>
-          </div>
-          <div className="terminal-panel" aria-hidden="true">
-            <div className="terminal-toolbar">
-              <span>agent output</span>
-              <strong>live</strong>
-            </div>
-            <div className="terminal-log">
-              {previewItems.map((item, index) => (
-                <p key={item.key} style={{ '--code-line': index }}>
-                  <span>$</span> {item.title}: {item.body}
-                </p>
-              ))}
-              <p className="terminal-cursor">
-                <span>$</span> waiting for confirmation
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="desktop-preview-status" aria-hidden="true">
-          <span>Desktop</span>
-          <span>Agent UI</span>
-          <span>Models</span>
-          <span>Sandbox</span>
-        </div>
-        <div className="desktop-preview-body is-legacy-preview" aria-hidden="true">
-          <div className="desktop-preview-nav">
-            {previewItems.map((item, index) => (
-              <span key={item.key} style={{ '--preview-step': index }}>
-                {item.title}
-              </span>
-            ))}
-          </div>
-          <div className="desktop-preview-main">
-            {previewItems.map((item, index) => (
-              <article className={index === 0 ? 'is-active' : ''} key={item.key} style={{ '--preview-step': index }}>
-                <strong>{item.title}</strong>
-                <p>{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </div>
-    </aside>
   );
 }
 
@@ -233,15 +44,12 @@ function HeroSection({ lang }) {
   return (
     <section className="hero home-hero">
       <div className="hero-copy" data-reveal>
-        <p className="eyebrow">{copy.home.eyebrow}</p>
+        <img className="hero-brand-logo" src="/zenmind-logo.svg" alt="" aria-hidden="true" />
         <h1>{copy.home.headline}</h1>
-        <p>{copy.home.heroIntro}</p>
       </div>
       <div className="hero-actions" data-reveal>
-        <DesktopDownloadDropdown lang={lang} />
-        <ButtonLink href={pathFor(lang, 'documents')} label={copy.home.primaryCta} showIcon={false} variant="secondary" />
+        <DirectDesktopDownloadButton lang={lang} />
       </div>
-      <HeroProductPreview lang={lang} />
     </section>
   );
 }

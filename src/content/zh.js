@@ -53,7 +53,7 @@ export const zh = {
     },
     home: {
       eyebrow: 'Desktop-first AI Agent Platform',
-      headline: '让 AI Agent\n在你的桌面持续工作',
+      headline: '让 AI Agent 在你的桌面持续工作',
       heroIntro:
         'ZenMind 将桌面端、本地服务、模型连接与沙箱环境组织成一个可控工作台，让长期任务、文档处理和 Agent 执行过程可见、可控、可复盘。',
       downloadMenuTitle: '选择版本下载桌面端',

@@ -53,7 +53,7 @@ export const en = {
     },
     home: {
       eyebrow: 'Desktop-first AI Agent Platform',
-      headline: 'Let AI agents\nkeep working on your desktop',
+      headline: 'Let AI agents keep working on your desktop',
       heroIntro:
         'ZenMind organizes the desktop app, local services, model connections, and sandbox environments into a controllable workspace where long-running tasks, document work, and agent execution stay visible, controllable, and reviewable.',
       downloadMenuTitle: 'Choose a desktop version',
