@@ -2,7 +2,7 @@ export const desktopInstallers = [
   {
     key: 'mac',
     name: 'macOS',
-    href: '/install/releases/desktop/ZenMind-macOS-arm64.dmg',
+    href: '/install/releases/desktop/0.2.4/ZenMind-macOS-arm64.dmg',
     available: true,
     version: '0.2.4',
     zh: {
@@ -23,7 +23,7 @@ export const desktopInstallers = [
   {
     key: 'windows',
     name: 'Windows',
-    href: '/downloads/ZenMind-0.2.3-x64.exe',
+    href: '/install/releases/desktop/0.2.3/ZenMind-0.2.3-x64.exe',
     available: true,
     version: '0.2.3',
     zh: {

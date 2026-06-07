@@ -12,12 +12,12 @@ function DirectDesktopDownloadButton({ lang }) {
   const localized = installer?.[lang];
 
   const handleClick = () => {
-    if (!installer?.available || hasCountedDownload(installer.key)) {
+    if (!installer?.available || hasCountedDownload(installer.key, installer.version)) {
       return;
     }
-    markDownloadCounted(installer.key);
+    markDownloadCounted(installer.key, installer.version);
     incrementLocalTotal(installer.key);
-    recordDownloadEvent(installer.key);
+    recordDownloadEvent(installer.key, installer.version);
   };
 
   if (!installer?.available || !installer.href) {

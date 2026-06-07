@@ -3,27 +3,30 @@ import { apiBase, apiRequest } from './api';
 
 const downloadCountStoragePrefix = 'zenmind:download-counted:';
 
-function downloadCountedStorageKey(installerKey) {
+function downloadCountedStorageKey(installerKey, version) {
+  if (version) {
+    return `${downloadCountStoragePrefix}${installerKey}:${version}`;
+  }
   return `${downloadCountStoragePrefix}${installerKey}`;
 }
 
-export function hasCountedDownload(installerKey) {
+export function hasCountedDownload(installerKey, version) {
   try {
-    return window.localStorage.getItem(downloadCountedStorageKey(installerKey)) === '1';
+    return window.localStorage.getItem(downloadCountedStorageKey(installerKey, version)) === '1';
   } catch {
     return false;
   }
 }
 
-export function markDownloadCounted(installerKey) {
+export function markDownloadCounted(installerKey, version) {
   try {
-    window.localStorage.setItem(downloadCountedStorageKey(installerKey), '1');
+    window.localStorage.setItem(downloadCountedStorageKey(installerKey, version), '1');
   } catch {
     // The download should continue even when browser storage is unavailable.
   }
 }
 
-export function recordDownloadEvent(installerKey) {
+export function recordDownloadEvent(installerKey, version) {
   fetch(`${apiBase}/downloads/events`, {
     method: 'POST',
     credentials: 'include',
@@ -31,7 +34,7 @@ export function recordDownloadEvent(installerKey) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ installerKey }),
+    body: JSON.stringify({ installerKey, version }),
   }).catch(() => {});
 }
 

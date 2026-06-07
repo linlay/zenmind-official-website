@@ -35,7 +35,7 @@ function PlatformDownloadCard({ installer, lang, recommended = false, onDownload
         <p>{localized.note}</p>
       </div>
       {installer.available ? (
-        <a className="button button-primary platform-action" download href={installer.href} onClick={() => onDownload(installer.key)}>
+        <a className="button button-primary platform-action" download href={installer.href} onClick={() => onDownload(installer.key, installer.version)}>
           <Icon type="download" />
           <span>{localized.button}</span>
         </a>
@@ -84,7 +84,7 @@ function DownloadRecommendation({ lang, installer, onDownload }) {
         </h2>
         <p>{localized.summary}</p>
       </div>
-      <a className="button button-primary" download href={installer.href} onClick={() => onDownload(installer.key)}>
+      <a className="button button-primary" download href={installer.href} onClick={() => onDownload(installer.key, installer.version)}>
         <Icon type="download" />
         <span>{localized.button}</span>
       </a>
@@ -98,12 +98,12 @@ export function DownloadPage({ lang }) {
   const detectedPlatform = useDetectedDesktopPlatform();
   const recommendedInstaller = desktopInstallers.find((installer) => installer.key === detectedPlatform);
 
-  const handleInstallerDownload = (installerKey) => {
-    if (hasCountedDownload(installerKey)) {
+  const handleInstallerDownload = (installerKey, version) => {
+    if (hasCountedDownload(installerKey, version)) {
       return;
     }
-    markDownloadCounted(installerKey);
-    recordDownloadEvent(installerKey);
+    markDownloadCounted(installerKey, version);
+    recordDownloadEvent(installerKey, version);
   };
 
   return (
