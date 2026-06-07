@@ -119,8 +119,8 @@ export const zh = {
           mediaType: 'video',
         },
       ],
-      finalCtaTitle: '准备让 Agent 在桌面开始工作',
-      finalCtaBody: '从桌面端开始使用，或查看文档完成安装和配置。',
+      finalCtaTitle: '立即试用 ZenMind',
+      finalCtaBody: '面向桌面、本地服务与多端工作流的 AI Agent 平台。',
       footerTagline: '面向桌面、本地服务与多端工作流的 AI Agent 平台。',
     },
     documents: {
@@ -215,9 +215,8 @@ export const zh = {
       ],
     },
     download: {
-      eyebrow: 'Download',
-      title: '下载 ZenMind',
-      intro: '选择你的平台下载安装 ZenMind Desktop。推荐入口会根据当前系统提示，但平台顺序保持固定。',
+      title: '下载中心',
+      intro: '选择你的平台下载安装 ZenMind Desktop',
       recommendation: {
         eyebrow: '推荐下载',
         titlePrefix: '推荐下载',

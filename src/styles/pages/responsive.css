@@ -41,7 +41,7 @@
   }
 
   .platform-download-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .docs-page .docs-section-grid,
@@ -307,9 +307,11 @@
   .home-final-cta {
     margin-top: 96px;
     margin-bottom: 0;
-    padding: 28px 0 24px;
+    min-height: 240px;
+    padding: 48px 20px 58px;
     flex-direction: column;
     align-items: stretch;
+    gap: 18px;
   }
 
   .home-showcase,
@@ -365,14 +367,16 @@
     align-items: flex-start;
   }
 
-  .footer-main {
+  .footer-bar {
     grid-template-columns: 1fr;
-    gap: 22px;
+    justify-items: center;
+    gap: 14px;
+    text-align: center;
   }
 
-  .footer-link-list {
-    grid-template-columns: repeat(2, max-content);
-    column-gap: 18px;
+  .footer-links {
+    justify-content: center;
+    gap: 8px 14px;
   }
 }
 
@@ -406,9 +410,20 @@
 
   .showcase-copy h2,
   .workflow-heading h2,
-  .home-final-cta h2,
   .capability-strip-heading h2 {
     font-size: 28px;
+  }
+
+  .platform-download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-final-cta h2 {
+    font-size: 28px;
+  }
+
+  .home-final-cta p {
+    font-size: 14px;
   }
 
   .home-hero h1 {

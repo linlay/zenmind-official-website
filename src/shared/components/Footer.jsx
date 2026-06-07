@@ -5,38 +5,37 @@ const footerSiteLinks = ['documents', 'download', 'news', 'market'];
 
 export function Footer({ lang }) {
   const copy = languages[lang];
+  const footerLinks = [
+    ...footerSiteLinks.map((key) => ({
+      href: pathFor(lang, key),
+      label: copy.nav[key],
+    })),
+    {
+      href: externalLinks.github,
+      label: copy.nav.github,
+      external: true,
+    },
+  ];
 
   return (
     <footer className="site-footer">
-      <div className="footer-main">
-        <div className="footer-brand-block">
-          <p className="footer-brand">ZenMind</p>
-          <p>{copy.home.footerTagline}</p>
-        </div>
-        <nav className="footer-group" aria-label={copy.footer.siteLinks}>
-          <p>{copy.footer.siteLinks}</p>
-          <div className="footer-link-list">
-            {footerSiteLinks.map((key) => (
-              <a href={pathFor(lang, key)} key={key}>
-                {copy.nav[key]}
-              </a>
-            ))}
-          </div>
-        </nav>
-        <nav className="footer-group" aria-label={copy.footer.resources}>
-          <p>{copy.footer.resources}</p>
-          <div className="footer-link-list">
-            <a href={externalLinks.github} rel="noreferrer" target="_blank">
-              {copy.footer.source}
+      <div className="footer-bar">
+        <a className="footer-brand" href={pathFor(lang, 'home')}>
+          ZenMind
+        </a>
+        <nav className="footer-links" aria-label={copy.footer.siteLinks}>
+          {footerLinks.map((link) => (
+            <a
+              href={link.href}
+              key={`${link.href}-${link.label}`}
+              rel={link.external ? 'noreferrer' : undefined}
+              target={link.external ? '_blank' : undefined}
+            >
+              {link.label}
             </a>
-            <a href={externalLinks.deployRepo} rel="noreferrer" target="_blank">
-              {copy.shared.deployDocs}
-            </a>
-          </div>
+          ))}
         </nav>
-      </div>
-      <div className="footer-bottom">
-        <span>&copy; 2026 ZenMind. {copy.footer.rights}</span>
+        <p className="footer-copyright">&copy; 2026 ZenMind</p>
       </div>
     </footer>
   );

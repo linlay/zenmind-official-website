@@ -1,93 +1,121 @@
-import { Link } from 'react-router-dom';
-import { desktopInstallers, externalLinks, languages } from '../../content';
+import { desktopInstallers, languages } from '../../content';
 import { hasCountedDownload, markDownloadCounted, recordDownloadEvent } from '../../shared/download-tracking';
 import { useDetectedDesktopPlatform } from '../../shared/platform';
-import { pathFor } from '../../shared/routing';
 import { Icon } from '../../shared/components/Icon';
 import { PageHeader } from '../../shared/components/PageHeader';
 
-function PlatformDownloadCard({ installer, lang, recommended = false, onDownload }) {
-  const copy = languages[lang];
-  const localized = installer[lang];
-  const status = installer.available ? 'ready' : 'soon';
+const platformLogoSrc = {
+  mac: '/platform-logos/macos.png',
+  windows: '/platform-logos/windows.png',
+  linux: '/platform-logos/linux.png',
+  ios: '/platform-logos/ios.png',
+  android: '/platform-logos/android.png',
+};
 
-  return (
-    <article className={`platform-card content-card${recommended ? ' is-recommended' : ''}`} data-reveal>
-      <div className="platform-card-top">
-        <div>
-          <span className="card-kicker">{localized.label}</span>
-          <h2>{installer.name}</h2>
+const platformOrder = ['windows', 'mac', 'linux', 'ios', 'android'];
+
+const platformSupport = {
+  zh: {
+    mac: '支持 macOS 10.12 及以上设备',
+    windows: '支持 Windows 11 / 10 / 8 / 7 等系统',
+    linux: 'Linux 桌面端开发中',
+    ios: 'iOS 移动端开发中',
+    android: 'Android 移动端开发中',
+  },
+  en: {
+    mac: 'Supports macOS 10.12 and later',
+    windows: 'Supports Windows 11 / 10 / 8 / 7',
+    linux: 'Linux desktop is in development',
+    ios: 'iOS app is in development',
+    android: 'Android app is in development',
+  },
+};
+
+const plannedPlatforms = [
+  {
+    key: 'ios',
+    name: 'iOS',
+    available: false,
+    version: null,
+    zh: {
+      label: 'iOS',
+      summary: '移动端安装包正在开发中',
+      button: '开发中',
+    },
+    en: {
+      label: 'iOS',
+      summary: 'Mobile installer is in development.',
+      button: 'In development',
+    },
+  },
+  {
+    key: 'android',
+    name: 'Android',
+    available: false,
+    version: null,
+    zh: {
+      label: 'Android',
+      summary: '移动端安装包正在开发中',
+      button: '开发中',
+    },
+    en: {
+      label: 'Android',
+      summary: 'Mobile installer is in development.',
+      button: 'In development',
+    },
+  },
+];
+
+function PlatformDownloadCard({ platform, lang, recommended = false, onDownload }) {
+  const copy = languages[lang];
+  const localized = platform[lang];
+  const status = platform.available ? 'ready' : 'soon';
+  const supportText = platformSupport[lang][platform.key];
+  const content = (
+    <>
+      <div className="platform-card-default">
+        <div className="platform-card-download-icon">
+          {platform.available ? <Icon type="download" /> : null}
         </div>
-        <div className="platform-badges">
-          {recommended ? <span className="status-pill status-preview">{copy.download.recommendedBadge}</span> : null}
-          <span className={`status-pill status-${status}`}>{installer.available ? copy.shared.statusReady : copy.shared.statusSoon}</span>
-        </div>
+        {recommended ? <span className="platform-current-badge">{copy.download.recommendedBadge}</span> : null}
+        {!platform.available ? <span className="platform-planned-badge">{copy.shared.statusSoon}</span> : null}
+        <img
+          alt=""
+          className={`platform-logo platform-logo-${platform.key}`}
+          src={platformLogoSrc[platform.key]}
+        />
+        <h2>{localized.label}</h2>
       </div>
-      <p>{localized.summary}</p>
-      <div className="platform-meta">
-        {installer.version ? <span>v{installer.version}</span> : null}
-        {localized.meta.map((item) => (
-          <span key={item}>{item}</span>
-        ))}
+      <div className="platform-card-hover" aria-hidden="true">
+        <span className="platform-hover-icon">
+          {platform.available ? (
+            <img
+              alt=""
+              className="platform-hover-icon-svg"
+              src="/download-hover-icon.svg"
+            />
+          ) : null}
+        </span>
+        <h2>{localized.label}</h2>
+        <p>{supportText}</p>
+        {!platform.available ? <strong>{copy.shared.statusSoon}</strong> : null}
       </div>
-      <div className="platform-note">
-        <strong>{copy.download.detailsLabel}</strong>
-        <p>{localized.note}</p>
-      </div>
-      {installer.available ? (
-        <a className="button button-primary platform-action" download href={installer.href} onClick={() => onDownload(installer.key, installer.version)}>
-          <Icon type="download" />
-          <span>{localized.button}</span>
-        </a>
-      ) : (
-        <Link className="button button-secondary platform-action" to={pathFor(lang, 'documents')}>
-          <span>{copy.shared.downloadFallback}</span>
-          <Icon type="arrow" />
-        </Link>
-      )}
-    </article>
+    </>
   );
-}
 
-function DownloadRecommendation({ lang, installer, onDownload }) {
-  const copy = languages[lang];
-  const localized = installer?.[lang];
-
-  if (!installer || !localized || !installer.available) {
-    return (
-      <article className="download-recommendation content-card" data-reveal>
-        <div>
-          <span className="card-kicker">{copy.download.recommendation.eyebrow}</span>
-          <h2>{copy.download.recommendation.unavailableTitle}</h2>
-          <p>{copy.download.recommendation.unavailableBody}</p>
-        </div>
-        <div className="download-recommendation-actions">
-          <Link className="button button-primary" to={pathFor(lang, 'documents')}>
-            <span>{copy.download.docsCta}</span>
-            <Icon type="arrow" />
-          </Link>
-          <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
-            <span>{copy.download.sourceCta}</span>
-            <Icon type="external" />
-          </a>
-        </div>
-      </article>
-    );
-  }
-
-  return (
-    <article className="download-recommendation content-card" data-reveal>
-      <div>
-        <span className="card-kicker">{copy.download.recommendation.eyebrow}</span>
-        <h2>
-          {copy.download.recommendation.titlePrefix} {localized.label}
-        </h2>
-        <p>{localized.summary}</p>
-      </div>
-      <a className="button button-primary" download href={installer.href} onClick={() => onDownload(installer.key, installer.version)}>
-        <Icon type="download" />
-        <span>{localized.button}</span>
-      </a>
+  return platform.available ? (
+    <a
+      className={`platform-card is-available${recommended ? ' is-recommended' : ''}`}
+      data-reveal
+      download
+      href={platform.href}
+      onClick={() => onDownload(platform.key, platform.version)}
+    >
+      {content}
+    </a>
+  ) : (
+    <article className={`platform-card is-planned status-${status}`} data-reveal>
+      {content}
     </article>
   );
 }
@@ -97,6 +125,9 @@ export function DownloadPage({ lang }) {
   const downloadCopy = copy.download;
   const detectedPlatform = useDetectedDesktopPlatform();
   const recommendedInstaller = desktopInstallers.find((installer) => installer.key === detectedPlatform);
+  const downloadPlatforms = [...desktopInstallers, ...plannedPlatforms].sort(
+    (left, right) => platformOrder.indexOf(left.key) - platformOrder.indexOf(right.key),
+  );
 
   const handleInstallerDownload = (installerKey, version) => {
     if (hasCountedDownload(installerKey, version)) {
@@ -111,46 +142,46 @@ export function DownloadPage({ lang }) {
       <PageHeader eyebrow={downloadCopy.eyebrow} title={downloadCopy.title} intro={downloadCopy.intro} />
 
       <div className="download-stack">
-        <DownloadRecommendation installer={recommendedInstaller} lang={lang} onDownload={handleInstallerDownload} />
-
         <section className="download-platforms" data-reveal>
-          <div className="download-section-heading">
-            <span className="card-kicker">{downloadCopy.desktop.eyebrow}</span>
-            <h2>{downloadCopy.platformsTitle}</h2>
-          </div>
           <div className="platform-download-grid">
-            {desktopInstallers.map((installer) => (
+            {downloadPlatforms.map((platform) => (
               <PlatformDownloadCard
-                installer={installer}
-                key={installer.key}
+                key={platform.key}
                 lang={lang}
-                recommended={installer.key === recommendedInstaller?.key}
+                platform={platform}
+                recommended={platform.key === recommendedInstaller?.key}
                 onDownload={handleInstallerDownload}
               />
             ))}
           </div>
         </section>
 
-        <article className="download-mobile-note content-card" data-reveal>
-          <div>
-            <span className="card-kicker">{downloadCopy.mobile.eyebrow}</span>
-            <div className="download-title-row">
-              <h2>{downloadCopy.mobile.title}</h2>
-              <span className="status-pill status-soon">{downloadCopy.mobile.status}</span>
+        <section className="download-product-preview" data-reveal>
+          <div className="download-preview-frame" aria-label={downloadCopy.desktop.visualTitle}>
+            <div className="download-preview-window">
+              <div className="download-preview-sidebar">
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="download-preview-main">
+                <div className="download-preview-toolbar">
+                  <span />
+                  <span />
+                </div>
+                <div className="download-preview-panel">
+                  <strong>{downloadCopy.desktop.visualTitle}</strong>
+                  <p>{downloadCopy.desktop.intro}</p>
+                </div>
+                <div className="download-preview-grid">
+                  {downloadCopy.desktop.visualRows.map((row) => (
+                    <span key={row}>{row}</span>
+                  ))}
+                </div>
+              </div>
             </div>
-            <p>{downloadCopy.mobile.intro}</p>
           </div>
-          <div className="download-recommendation-actions">
-            <Link className="button button-secondary" to={pathFor(lang, 'documents')}>
-              <span>{copy.download.docsCta}</span>
-              <Icon type="arrow" />
-            </Link>
-            <a className="button button-secondary" href={externalLinks.github} rel="noreferrer" target="_blank">
-              <span>{copy.download.sourceCta}</span>
-              <Icon type="external" />
-            </a>
-          </div>
-        </article>
+        </section>
       </div>
     </section>
   );

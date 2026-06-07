@@ -119,8 +119,8 @@ export const en = {
           mediaType: 'video',
         },
       ],
-      finalCtaTitle: 'Ready to let agents work on your desktop',
-      finalCtaBody: 'Start with the desktop app, or read the docs to finish installation and setup.',
+      finalCtaTitle: 'Try ZenMind now',
+      finalCtaBody: 'Desktop-first AI Agent platform for local, web, and mobile workflows.',
       footerTagline: 'Desktop-first AI Agent platform for local, web, and mobile workflows.',
     },
     documents: {
@@ -216,9 +216,8 @@ export const en = {
       ],
     },
     download: {
-      eyebrow: 'Download',
-      title: 'Download ZenMind',
-      intro: 'Choose your platform to install ZenMind Desktop. The recommendation follows your current system while the platform order stays fixed.',
+      title: 'Download center',
+      intro: 'Choose your platform to install ZenMind Desktop.',
       recommendation: {
         eyebrow: 'Recommended',
         titlePrefix: 'Recommended for',

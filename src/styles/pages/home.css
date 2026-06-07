@@ -8,6 +8,10 @@
   margin-left: auto;
 }
 
+.content-shell.is-home-page > .home-final-cta {
+  width: 100%;
+}
+
 .home-hero {
   width: 100%;
   min-height: calc(100svh - 90px);
@@ -1016,47 +1020,83 @@
 }
 
 .home-final-cta {
-  margin: 124px 0 0;
-  padding: 30px 0 22px;
-  display: flex;
+  min-height: 280px;
+  margin: 118px 0 0;
+  padding: 64px max(24px, calc((100vw - 1180px) / 2)) 72px;
+  display: grid;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  border-top: 1px solid var(--border);
+  justify-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  border-top: 0;
   border-bottom: 0;
   background: transparent;
+  text-align: center;
+}
+
+.home-final-cta > div:first-child {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
 }
 
 .content-shell.is-home-page + .site-footer {
-  padding-top: 0;
-  border-top: 0;
+  margin-top: 34px;
 }
 
 .home-final-cta h2 {
   margin: 0;
-  font-size: clamp(30px, 3.2vw, 40px);
-  line-height: 1.14;
-  font-weight: 760;
+  color: var(--text);
+  font-size: clamp(30px, 3.2vw, 42px);
+  line-height: 1.1;
+  font-weight: 780;
+  letter-spacing: 0;
 }
 
 .home-final-cta p {
-  max-width: 680px;
-  margin: 12px 0 0;
+  max-width: 760px;
+  margin: 0;
   color: var(--text-muted);
-  font-size: 16px;
-  line-height: 1.8;
+  font-size: clamp(14px, 1.15vw, 17px);
+  line-height: 1.65;
+  font-weight: 500;
 }
 
 .home-final-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 12px;
+  margin-top: 6px;
+}
+
+.home-final-actions .button-primary {
+  min-height: 46px;
+  padding: 0 24px;
+  font-size: 15px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.home-final-actions .button-secondary {
+  display: none;
 }
 
 :root[data-theme='dark'] .home-hero {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--bg) 88%, var(--bg-elevated)) 0%, var(--bg) 100%);
+}
+
+:root[data-theme='dark'] .home-final-cta {
+  background: transparent;
+}
+
+:root[data-theme='dark'] .home-final-cta h2 {
+  color: var(--text);
+}
+
+:root[data-theme='dark'] .home-final-cta p {
+  color: var(--text-muted);
 }
 
 :root[data-theme='dark'] .hero-brand-logo {

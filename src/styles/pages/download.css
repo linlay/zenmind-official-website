@@ -7,51 +7,32 @@
 
 .download-stack {
   display: grid;
-  gap: 18px;
+  gap: 96px;
+  margin-top: 48px;
 }
 
-.download-recommendation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 62%, transparent), transparent 48%),
-    color-mix(in srgb, var(--bg-elevated) 94%, transparent);
-}
-
-.download-recommendation h2,
-.download-section-heading h2,
 .platform-card h2 {
   margin: 0;
 }
 
-.download-recommendation p {
-  max-width: 680px;
-  color: var(--text-muted);
-}
-
-.download-recommendation-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: flex-end;
-}
-
-.download-section-heading {
-  max-width: 760px;
-}
-
 .platform-download-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 22px;
 }
 
 .platform-card {
-  display: grid;
-  gap: 18px;
-  align-content: start;
+  position: relative;
+  min-height: 272px;
+  overflow: hidden;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg-elevated);
+  box-shadow: 0 16px 42px rgba(20, 22, 26, 0.08);
+  color: var(--text);
+  text-align: center;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
 .platform-card.is-recommended {
@@ -59,127 +40,299 @@
   box-shadow: 0 20px 50px rgba(19, 104, 255, 0.12);
 }
 
-.platform-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
+.platform-card.is-available {
+  cursor: pointer;
 }
 
-.platform-card p {
-  margin: 0;
+.platform-card.is-available:hover,
+.platform-card.is-available:focus-visible,
+.platform-card.is-planned:hover {
+  border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
+  box-shadow: 0 24px 58px rgba(19, 104, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+.platform-card-default,
+.platform-card-hover {
+  position: absolute;
+  inset: 0;
+  padding: 28px 20px 24px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 14px;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.platform-card-hover {
+  color: #fff;
+  background:
+    radial-gradient(circle at 18% 76%, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(135deg, #13a1ff 0%, #1368ff 58%, #2f78ff 100%);
+  opacity: 0;
+  transform: scale(1.015);
+}
+
+.platform-card.is-planned .platform-card-hover {
+  background:
+    radial-gradient(circle at 18% 76%, rgba(255, 255, 255, 0.14), transparent 34%),
+    linear-gradient(135deg, #7c8798 0%, #5e6675 58%, #737b8a 100%);
+}
+
+.platform-card:hover .platform-card-default,
+.platform-card:focus-visible .platform-card-default {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.platform-card:hover .platform-card-hover,
+.platform-card:focus-visible .platform-card-hover {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.platform-card-download-icon {
+  position: absolute;
+  top: 18px;
+  right: 18px;
   color: var(--text-muted);
 }
 
-.platform-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
+.platform-card-download-icon:empty {
+  display: none;
 }
 
-.platform-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.platform-meta span {
-  min-height: 30px;
+.platform-current-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  min-height: 26px;
   padding: 0 9px;
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  background: var(--surface);
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-soft);
   font-size: 12px;
-  font-weight: 750;
+  font-weight: 800;
 }
 
-.platform-note {
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-muted);
+.platform-planned-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  min-height: 26px;
+  padding: 0 9px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 12%, var(--surface));
+  font-size: 12px;
+  font-weight: 800;
 }
 
-.platform-note strong {
+.platform-logo {
+  width: 88px;
+  height: 88px;
   display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
+  object-fit: contain;
 }
 
-.platform-action {
-  justify-self: flex-start;
+.platform-logo-ios {
+  width: 124px;
 }
 
-.download-mobile-note {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+.platform-logo-android {
+  width: 130px;
 }
 
-.download-section {
-  overflow: hidden;
+.platform-card h2 {
+  font-size: 24px;
+  line-height: 1.2;
 }
 
-.download-card {
-  display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(360px, 1.08fr);
-  gap: 30px;
-  align-items: center;
-}
-
-.download-card h2 {
+.platform-card p {
+  min-height: 42px;
+  max-width: 190px;
   margin: 0;
-  font-size: 42px;
-  line-height: 1.08;
-  font-weight: 760;
-}
-
-.download-card p {
-  margin: 16px 0 0;
-  max-width: 560px;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
-.download-actions {
-  margin-top: 28px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+.platform-card-hover h2 {
+  color: inherit;
+  font-size: 25px;
 }
 
-.download-actions .button {
-  min-width: 190px;
+.platform-card-hover p {
+  min-height: 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 16px;
+  line-height: 1.7;
 }
 
-.download-title-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.download-title-row .status-pill {
-  flex-shrink: 0;
-  margin-top: 6px;
-}
-
-.download-soon-badge {
-  justify-self: flex-start;
-  min-height: 34px;
+.platform-card-hover strong {
+  min-height: 30px;
   padding: 0 12px;
   display: inline-flex;
   align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 13px;
+  font-weight: 780;
+}
+
+.platform-hover-icon {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #1368ff;
+}
+
+.platform-hover-icon:empty {
+  display: none;
+}
+
+.platform-hover-icon-svg {
+  width: 72px;
+  height: 72px;
+  display: block;
+}
+
+.download-product-preview {
+  display: grid;
+  justify-items: center;
+  padding-top: 10px;
+  text-align: center;
+}
+
+.download-preview-frame {
+  width: min(860px, 100%);
+  padding: 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--warning);
-  background: var(--surface);
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 800;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+  box-shadow: 0 26px 70px rgba(20, 22, 26, 0.1);
+}
+
+.download-preview-window {
+  min-height: 360px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 72%, transparent), transparent 46%),
+    var(--surface);
+}
+
+.download-preview-sidebar {
+  padding: 28px 20px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  border-right: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-muted) 72%, transparent);
+}
+
+.download-preview-sidebar span {
+  height: 34px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 58%, transparent);
+}
+
+.download-preview-main {
+  padding: 28px;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  text-align: left;
+}
+
+.download-preview-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.download-preview-toolbar span {
+  width: 34px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.download-preview-panel {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+}
+
+.download-preview-panel strong {
+  display: block;
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.download-preview-panel p {
+  max-width: 520px;
+  margin: 10px 0 0;
+  color: var(--text-muted);
+}
+
+.download-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.download-preview-grid span {
+  min-height: 54px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .download-stack {
+    gap: 38px;
+  }
+
+  .platform-card {
+    min-height: 0;
+  }
+
+  .download-preview-window {
+    min-height: 420px;
+    grid-template-columns: 1fr;
+  }
+
+  .download-preview-sidebar {
+    padding: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .download-preview-main {
+    padding: 20px;
+  }
+
+  .download-preview-grid {
+    grid-template-columns: 1fr;
+  }
 }
