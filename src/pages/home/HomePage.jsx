@@ -1,5 +1,6 @@
-import { desktopInstallers, languages } from '../../content';
+import { languages } from '../../content';
 import { hasCountedDownload, markDownloadCounted, recordDownloadEvent, useDownloadTotals } from '../../shared/download-tracking';
+import { useDesktopInstallers } from '../../shared/installers';
 import { useDetectedDesktopPlatform } from '../../shared/platform';
 import { pathFor } from '../../shared/routing';
 import { ButtonLink } from '../../shared/components/ButtonLink';
@@ -7,8 +8,9 @@ import { ButtonLink } from '../../shared/components/ButtonLink';
 function DirectDesktopDownloadButton({ lang }) {
   const detectedPlatform = useDetectedDesktopPlatform();
   const copy = languages[lang];
+  const { installers } = useDesktopInstallers();
   const { incrementLocalTotal } = useDownloadTotals();
-  const installer = desktopInstallers.find((entry) => entry.key === detectedPlatform);
+  const installer = installers.find((entry) => entry.key === detectedPlatform);
   const localized = installer?.[lang];
 
   const handleClick = () => {

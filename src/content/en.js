@@ -227,6 +227,8 @@ export const en = {
       },
       platformsTitle: 'Choose a platform',
       recommendedBadge: 'Recommended',
+      maintenanceBadge: 'Maintenance',
+      maintenanceBody: 'Installer version service is temporarily unavailable. Please try again later.',
       detailsLabel: 'Install notes',
       docsCta: 'Read docs',
       sourceCta: 'View source',

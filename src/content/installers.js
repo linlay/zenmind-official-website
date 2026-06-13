@@ -1,10 +1,7 @@
-export const desktopInstallers = [
+export const desktopInstallerPlatforms = [
   {
     key: 'mac',
     name: 'macOS',
-    href: '/install/releases/desktop/0.2.4/ZenMind-macOS-arm64.dmg',
-    available: true,
-    version: '0.2.4',
     zh: {
       label: 'macOS',
       button: '下载 macOS 版',
@@ -23,9 +20,6 @@ export const desktopInstallers = [
   {
     key: 'windows',
     name: 'Windows',
-    href: '/install/releases/desktop/0.2.3/ZenMind-0.2.3-x64.exe',
-    available: true,
-    version: '0.2.3',
     zh: {
       label: 'Windows',
       button: '下载 Windows 版',
@@ -41,25 +35,11 @@ export const desktopInstallers = [
       note: 'Run the installer and follow the setup guide.',
     },
   },
-  {
-    key: 'linux',
-    name: 'Linux',
-    href: null,
-    available: false,
-    version: null,
-    zh: {
-      label: 'Linux',
-      button: 'Linux 版暂未开放',
-      summary: 'Desktop 安装包暂未提供 Linux 版本',
-      meta: ['Desktop 包规划中', '可查看文档', '可访问源码'],
-      note: '当前 Desktop 打包目标为 macOS DMG 与 Windows NSIS。',
-    },
-    en: {
-      label: 'Linux',
-      button: 'Linux build not available yet',
-      summary: 'A Linux Desktop installer is not available yet.',
-      meta: ['Desktop package planned', 'docs available', 'source available'],
-      note: 'Current Desktop packaging targets are macOS DMG and Windows NSIS.',
-    },
-  },
 ];
+
+export const desktopInstallers = desktopInstallerPlatforms.map((platform) => ({
+  ...platform,
+  available: false,
+  version: null,
+  href: null,
+}));

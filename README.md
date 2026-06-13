@@ -91,7 +91,7 @@ English:
 - `src/site-data.js`
   - 维护路由映射
   - 维护官网文案
-- 维护 `externalLinks` 与 `desktopInstallers`
+- 维护 `externalLinks` 与 Desktop 平台静态文案
 - `src/App.jsx`
   - 维护页面结构、路由映射与复用组件
 - `src/styles.css`
@@ -100,7 +100,8 @@ English:
 安装入口策略：
 
 - 官网仍展示 macOS、Windows 与 Linux 的 Desktop 安装入口状态
-- 首页复用同一份 `desktopInstallers`
+- macOS 与 Windows 的当前版本、下载地址、文件大小和校验值来自后端 `GET /api/installers`
+- 首页与下载页复用同一份动态 installer catalog
 - 官网只展示下载入口与说明，不再把安装脚本作为仓库产物维护
 
 ## 5. 与 zenmind-deploy 的关系

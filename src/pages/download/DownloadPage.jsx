@@ -1,5 +1,6 @@
-import { desktopInstallers, languages } from '../../content';
+import { languages } from '../../content';
 import { hasCountedDownload, markDownloadCounted, recordDownloadEvent } from '../../shared/download-tracking';
+import { useDesktopInstallers } from '../../shared/installers';
 import { useDetectedDesktopPlatform } from '../../shared/platform';
 import { Icon } from '../../shared/components/Icon';
 import { PageHeader } from '../../shared/components/PageHeader';
@@ -32,6 +33,26 @@ const platformSupport = {
 };
 
 const plannedPlatforms = [
+  {
+    key: 'linux',
+    name: 'Linux',
+    available: false,
+    version: null,
+    zh: {
+      label: 'Linux',
+      button: 'Linux 版暂未开放',
+      summary: 'Desktop 安装包暂未提供 Linux 版本',
+      meta: ['Desktop 包规划中', '可查看文档', '可访问源码'],
+      note: '当前 Desktop 打包目标为 macOS DMG 与 Windows NSIS。',
+    },
+    en: {
+      label: 'Linux',
+      button: 'Linux build not available yet',
+      summary: 'A Linux Desktop installer is not available yet.',
+      meta: ['Desktop package planned', 'docs available', 'source available'],
+      note: 'Current Desktop packaging targets are macOS DMG and Windows NSIS.',
+    },
+  },
   {
     key: 'ios',
     name: 'iOS',
@@ -70,7 +91,8 @@ function PlatformDownloadCard({ platform, lang, recommended = false, onDownload 
   const copy = languages[lang];
   const localized = platform[lang];
   const status = platform.available ? 'ready' : 'soon';
-  const supportText = platformSupport[lang][platform.key];
+  const unavailableLabel = platform.maintenance ? copy.download.maintenanceBadge : copy.shared.statusSoon;
+  const supportText = platform.maintenance ? copy.download.maintenanceBody : platformSupport[lang][platform.key];
   const content = (
     <>
       <div className="platform-card-default">
@@ -78,7 +100,7 @@ function PlatformDownloadCard({ platform, lang, recommended = false, onDownload 
           {platform.available ? <Icon type="download" /> : null}
         </div>
         {recommended ? <span className="platform-current-badge">{copy.download.recommendedBadge}</span> : null}
-        {!platform.available ? <span className="platform-planned-badge">{copy.shared.statusSoon}</span> : null}
+        {!platform.available ? <span className="platform-planned-badge">{unavailableLabel}</span> : null}
         <img
           alt=""
           className={`platform-logo platform-logo-${platform.key}`}
@@ -98,7 +120,7 @@ function PlatformDownloadCard({ platform, lang, recommended = false, onDownload 
         </span>
         <h2>{localized.label}</h2>
         <p>{supportText}</p>
-        {!platform.available ? <strong>{copy.shared.statusSoon}</strong> : null}
+        {!platform.available ? <strong>{unavailableLabel}</strong> : null}
       </div>
     </>
   );
@@ -124,6 +146,11 @@ export function DownloadPage({ lang }) {
   const copy = languages[lang];
   const downloadCopy = copy.download;
   const detectedPlatform = useDetectedDesktopPlatform();
+  const { installers, error: installerError } = useDesktopInstallers();
+  const catalogUnavailable = Boolean(installerError);
+  const desktopInstallers = catalogUnavailable
+    ? installers.map((installer) => ({ ...installer, maintenance: true }))
+    : installers;
   const recommendedInstaller = desktopInstallers.find((installer) => installer.key === detectedPlatform);
   const downloadPlatforms = [...desktopInstallers, ...plannedPlatforms].sort(
     (left, right) => platformOrder.indexOf(left.key) - platformOrder.indexOf(right.key),
@@ -154,6 +181,7 @@ export function DownloadPage({ lang }) {
               />
             ))}
           </div>
+          {catalogUnavailable ? <p className="download-maintenance-message">{downloadCopy.maintenanceBody}</p> : null}
         </section>
 
         <section className="download-product-preview" data-reveal>

@@ -226,6 +226,8 @@ export const zh = {
       },
       platformsTitle: '选择平台',
       recommendedBadge: '推荐',
+      maintenanceBadge: '维护中',
+      maintenanceBody: '安装包版本服务暂时不可用，请稍后再试。',
       detailsLabel: '安装说明',
       docsCta: '查看文档',
       sourceCta: '查看源码',
