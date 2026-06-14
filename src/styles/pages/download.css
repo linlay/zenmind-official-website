@@ -15,6 +15,10 @@
   margin: 0;
 }
 
+.platform-card-reveal {
+  min-width: 0;
+}
+
 .platform-download-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -44,6 +48,18 @@
 
 .platform-card.is-available {
   cursor: pointer;
+}
+
+.platform-card-link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: inherit;
+}
+
+.platform-card-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 52%, transparent);
+  outline-offset: -3px;
 }
 
 .platform-card.is-recommended {
@@ -89,13 +105,15 @@
 }
 
 .platform-card:hover .platform-card-default,
-.platform-card:focus-visible .platform-card-default {
+.platform-card:focus-visible .platform-card-default,
+.platform-card:focus-within .platform-card-default {
   opacity: 0;
   transform: scale(0.985);
 }
 
 .platform-card:hover .platform-card-hover,
-.platform-card:focus-visible .platform-card-hover {
+.platform-card:focus-visible .platform-card-hover,
+.platform-card:focus-within .platform-card-hover {
   opacity: 1;
   transform: scale(1);
 }

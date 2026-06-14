@@ -134,20 +134,23 @@ function PlatformDownloadCard({ platform, lang, recommended = false, onDownload 
     </>
   );
 
-  return platform.available ? (
-    <a
-      className={`platform-card is-available${recommended ? ' is-recommended' : ''}`}
-      data-reveal
-      download
-      href={platform.href}
-      onClick={() => onDownload(platform.key, platform.version)}
-    >
-      {content}
-    </a>
-  ) : (
-    <article className={`platform-card ${unavailableClass} status-${status}`} data-reveal>
-      {content}
-    </article>
+  return (
+    <div className="platform-card-reveal" data-reveal>
+      <article
+        className={`platform-card ${platform.available ? 'is-available' : unavailableClass} status-${status}${recommended ? ' is-recommended' : ''}`}
+      >
+        {platform.available ? (
+          <a
+            className="platform-card-link"
+            download
+            href={platform.href}
+            onClick={() => onDownload(platform.key, platform.version)}
+          >
+            {content}
+          </a>
+        ) : content}
+      </article>
+    </div>
   );
 }
 
