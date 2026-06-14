@@ -1,44 +1,115 @@
 import { languages } from '../../content';
 import { hasCountedDownload, markDownloadCounted, recordDownloadEvent } from '../../shared/download-tracking';
 import { useDesktopInstallers } from '../../shared/installers';
+import { useDetectedDesktopPlatform } from '../../shared/platform';
 import { Icon } from '../../shared/components/Icon';
 import { PageHeader } from '../../shared/components/PageHeader';
 
 const platformLogoSrc = {
   mac: '/platform-logos/macos.png',
   windows: '/platform-logos/windows.png',
+  linux: '/platform-logos/linux.png',
+  ios: '/platform-logos/ios.png',
+  android: '/platform-logos/android.png',
 };
 
-const platformOrder = ['windows', 'mac'];
+const platformOrder = ['windows', 'mac', 'linux', 'ios', 'android'];
 
 const platformSupport = {
   zh: {
     mac: '支持 macOS 10.12 及以上设备',
     windows: '支持 Windows 11 / 10 / 8 / 7 等系统',
+    linux: 'Linux 桌面端开发中',
+    ios: 'iOS 移动端开发中',
+    android: 'Android 移动端开发中',
   },
   en: {
     mac: 'Supports macOS 10.12 and later',
     windows: 'Supports Windows 11 / 10 / 8 / 7',
+    linux: 'Linux desktop is in development',
+    ios: 'iOS app is in development',
+    android: 'Android app is in development',
   },
 };
 
-function PlatformDownloadCard({ platform, lang, onDownload }) {
+const plannedPlatforms = [
+  {
+    key: 'linux',
+    name: 'Linux',
+    available: false,
+    version: null,
+    zh: {
+      label: 'Linux',
+      button: 'Linux 版暂未开放',
+      summary: 'Desktop 安装包暂未提供 Linux 版本',
+      meta: ['Desktop 包规划中', '可查看文档', '可访问源码'],
+      note: '当前 Desktop 打包目标为 macOS DMG 与 Windows NSIS。',
+    },
+    en: {
+      label: 'Linux',
+      button: 'Linux build not available yet',
+      summary: 'A Linux Desktop installer is not available yet.',
+      meta: ['Desktop package planned', 'docs available', 'source available'],
+      note: 'Current Desktop packaging targets are macOS DMG and Windows NSIS.',
+    },
+  },
+  {
+    key: 'ios',
+    name: 'iOS',
+    available: false,
+    version: null,
+    zh: {
+      label: 'iOS',
+      summary: '移动端安装包正在开发中',
+      button: '开发中',
+    },
+    en: {
+      label: 'iOS',
+      summary: 'Mobile installer is in development.',
+      button: 'In development',
+    },
+  },
+  {
+    key: 'android',
+    name: 'Android',
+    available: false,
+    version: null,
+    zh: {
+      label: 'Android',
+      summary: '移动端安装包正在开发中',
+      button: '开发中',
+    },
+    en: {
+      label: 'Android',
+      summary: 'Mobile installer is in development.',
+      button: 'In development',
+    },
+  },
+];
+
+function PlatformDownloadCard({ platform, lang, recommended = false, onDownload }) {
   const copy = languages[lang];
   const localized = platform[lang];
-  const status = platform.available ? 'ready' : platform.loading ? 'loading' : 'unavailable';
-  const unavailableLabel = platform.loading ? copy.download.loadingBadge : copy.download.maintenanceBadge;
+  const status = platform.available ? 'ready' : platform.loading ? 'loading' : platform.maintenance ? 'maintenance' : 'soon';
+  const unavailableLabel = platform.loading
+    ? copy.download.loadingBadge
+    : platform.maintenance
+      ? copy.download.maintenanceBadge
+      : copy.shared.statusSoon;
   const supportText = platform.loading
     ? copy.download.loadingBody
     : platform.maintenance
       ? copy.download.maintenanceBody
       : platformSupport[lang][platform.key];
+  const unavailableClass = platform.loading || platform.maintenance ? 'is-unavailable' : 'is-planned';
   const content = (
     <>
       <div className="platform-card-default">
         <div className="platform-card-download-icon">
           {platform.available ? <Icon type="download" /> : null}
         </div>
-        {!platform.available ? <span className="platform-status-badge">{unavailableLabel}</span> : null}
+        {recommended ? <span className="platform-current-badge">{copy.download.recommendedBadge}</span> : null}
+        {!platform.available ? <span className="platform-planned-badge">{unavailableLabel}</span> : null}
         <img
           alt=""
           className={`platform-logo platform-logo-${platform.key}`}
@@ -65,7 +136,7 @@ function PlatformDownloadCard({ platform, lang, onDownload }) {
 
   return platform.available ? (
     <a
-      className="platform-card is-available"
+      className={`platform-card is-available${recommended ? ' is-recommended' : ''}`}
       data-reveal
       download
       href={platform.href}
@@ -74,7 +145,7 @@ function PlatformDownloadCard({ platform, lang, onDownload }) {
       {content}
     </a>
   ) : (
-    <article className={`platform-card is-unavailable status-${status}`} data-reveal>
+    <article className={`platform-card ${unavailableClass} status-${status}`} data-reveal>
       {content}
     </article>
   );
@@ -83,13 +154,18 @@ function PlatformDownloadCard({ platform, lang, onDownload }) {
 export function DownloadPage({ lang }) {
   const copy = languages[lang];
   const downloadCopy = copy.download;
+  const detectedPlatform = useDetectedDesktopPlatform();
   const { installers, loading, error: installerError } = useDesktopInstallers();
   const catalogUnavailable = Boolean(installerError);
-  const downloadPlatforms = installers.map((installer) => ({
+  const desktopInstallers = installers.map((installer) => ({
     ...installer,
-    loading,
+    loading: loading && !installer.available,
     maintenance: !loading && (catalogUnavailable || !installer.available),
-  })).sort(
+  }));
+  const recommendedInstaller = desktopInstallers.find(
+    (installer) => installer.available && installer.key === detectedPlatform,
+  );
+  const downloadPlatforms = [...desktopInstallers, ...plannedPlatforms].sort(
     (left, right) => platformOrder.indexOf(left.key) - platformOrder.indexOf(right.key),
   );
 
@@ -113,6 +189,7 @@ export function DownloadPage({ lang }) {
                 key={platform.key}
                 lang={lang}
                 platform={platform}
+                recommended={platform.key === recommendedInstaller?.key}
                 onDownload={handleInstallerDownload}
               />
             ))}

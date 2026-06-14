@@ -137,7 +137,7 @@ export const zh = {
           cards: [
             {
               title: '下载安装',
-              body: '按平台选择桌面端安装包，获取 Windows 与 macOS 的当前可用版本。',
+              body: '按平台选择桌面端安装包，了解 macOS、Windows 与 Linux 的当前可用状态。',
               audience: '新用户',
               status: 'ready',
               href: '/download',
@@ -225,6 +225,7 @@ export const zh = {
         unknownLabel: '当前系统',
       },
       platformsTitle: '选择平台',
+      recommendedBadge: '推荐',
       loadingBadge: '加载中',
       loadingBody: '正在读取当前安装包版本，请稍候。',
       maintenanceBadge: '维护中',
