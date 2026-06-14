@@ -1,31 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { apiBase, apiRequest } from './api';
 
-const downloadCountStoragePrefix = 'zenmind:download-counted:';
-
-function downloadCountedStorageKey(installerKey, version) {
-  if (version) {
-    return `${downloadCountStoragePrefix}${installerKey}:${version}`;
-  }
-  return `${downloadCountStoragePrefix}${installerKey}`;
-}
-
-export function hasCountedDownload(installerKey, version) {
-  try {
-    return window.localStorage.getItem(downloadCountedStorageKey(installerKey, version)) === '1';
-  } catch {
-    return false;
-  }
-}
-
-export function markDownloadCounted(installerKey, version) {
-  try {
-    window.localStorage.setItem(downloadCountedStorageKey(installerKey, version), '1');
-  } catch {
-    // The download should continue even when browser storage is unavailable.
-  }
-}
-
 export function recordDownloadEvent(installerKey, version) {
   fetch(`${apiBase}/downloads/events`, {
     method: 'POST',

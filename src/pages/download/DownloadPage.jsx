@@ -1,5 +1,5 @@
 import { languages } from '../../content';
-import { hasCountedDownload, markDownloadCounted, recordDownloadEvent } from '../../shared/download-tracking';
+import { recordDownloadEvent, useDownloadTotals } from '../../shared/download-tracking';
 import { useDesktopInstallers } from '../../shared/installers';
 import { useDetectedDesktopPlatform } from '../../shared/platform';
 import { Icon } from '../../shared/components/Icon';
@@ -14,6 +14,7 @@ const platformLogoSrc = {
 };
 
 const platformOrder = ['windows', 'mac', 'linux', 'ios', 'android'];
+const countedPlatformKeys = new Set(['windows', 'mac']);
 
 const platformSupport = {
   zh: {
@@ -87,9 +88,17 @@ const plannedPlatforms = [
   },
 ];
 
-function PlatformDownloadCard({ platform, lang, recommended = false, onDownload }) {
+function formatDownloadCount(lang, total) {
+  const copy = languages[lang].download;
+  const locale = lang === 'zh' ? 'zh-CN' : 'en';
+  const value = new Intl.NumberFormat(locale).format(Number(total || 0));
+  return `${copy.downloadedCountPrefix}${value}${copy.downloadedCountSuffix}`;
+}
+
+function PlatformDownloadCard({ platform, lang, recommended = false, downloadTotal = null, onDownload }) {
   const copy = languages[lang];
   const localized = platform[lang];
+  const showDownloadTotal = countedPlatformKeys.has(platform.key) && downloadTotal !== null;
   const status = platform.available ? 'ready' : platform.loading ? 'loading' : platform.maintenance ? 'maintenance' : 'soon';
   const unavailableLabel = platform.loading
     ? copy.download.loadingBadge
@@ -116,6 +125,9 @@ function PlatformDownloadCard({ platform, lang, recommended = false, onDownload 
           src={platformLogoSrc[platform.key]}
         />
         <h2>{localized.label}</h2>
+        {showDownloadTotal ? (
+          <span className="platform-download-total">{formatDownloadCount(lang, downloadTotal)}</span>
+        ) : null}
       </div>
       <div className="platform-card-hover" aria-hidden="true">
         <span className="platform-hover-icon">
@@ -159,6 +171,7 @@ export function DownloadPage({ lang }) {
   const downloadCopy = copy.download;
   const detectedPlatform = useDetectedDesktopPlatform();
   const { installers, loading, error: installerError } = useDesktopInstallers();
+  const { totals, incrementLocalTotal } = useDownloadTotals();
   const catalogUnavailable = Boolean(installerError);
   const desktopInstallers = installers.map((installer) => ({
     ...installer,
@@ -173,10 +186,7 @@ export function DownloadPage({ lang }) {
   );
 
   const handleInstallerDownload = (installerKey, version) => {
-    if (hasCountedDownload(installerKey, version)) {
-      return;
-    }
-    markDownloadCounted(installerKey, version);
+    incrementLocalTotal(installerKey);
     recordDownloadEvent(installerKey, version);
   };
 
@@ -192,6 +202,7 @@ export function DownloadPage({ lang }) {
                 key={platform.key}
                 lang={lang}
                 platform={platform}
+                downloadTotal={countedPlatformKeys.has(platform.key) ? totals[platform.key] || 0 : null}
                 recommended={platform.key === recommendedInstaller?.key}
                 onDownload={handleInstallerDownload}
               />

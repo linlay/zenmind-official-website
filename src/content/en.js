@@ -231,6 +231,8 @@ export const en = {
       loadingBody: 'Reading the current installer versions. Please wait.',
       maintenanceBadge: 'Maintenance',
       maintenanceBody: 'Installer version service is temporarily unavailable. Please try again later.',
+      downloadedCountPrefix: 'Downloaded ',
+      downloadedCountSuffix: ' times',
       detailsLabel: 'Install notes',
       docsCta: 'Read docs',
       sourceCta: 'View source',
