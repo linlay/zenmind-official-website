@@ -138,7 +138,7 @@ export const en = {
           cards: [
             {
               title: 'Download and install',
-              body: 'Choose the desktop installer for your platform and review the current macOS, Windows, and Linux status.',
+              body: 'Choose the desktop installer for your platform and get the current Windows and macOS versions.',
               audience: 'New users',
               status: 'ready',
               href: '/en/download',
@@ -226,7 +226,8 @@ export const en = {
         unknownLabel: 'Current system',
       },
       platformsTitle: 'Choose a platform',
-      recommendedBadge: 'Recommended',
+      loadingBadge: 'Loading',
+      loadingBody: 'Reading the current installer versions. Please wait.',
       maintenanceBadge: 'Maintenance',
       maintenanceBody: 'Installer version service is temporarily unavailable. Please try again later.',
       detailsLabel: 'Install notes',

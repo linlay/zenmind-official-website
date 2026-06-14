@@ -17,8 +17,11 @@
 
 .platform-download-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
+  max-width: 760px;
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .download-maintenance-message {
@@ -42,18 +45,13 @@
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
-.platform-card.is-recommended {
-  border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
-  box-shadow: 0 20px 50px rgba(19, 104, 255, 0.12);
-}
-
 .platform-card.is-available {
   cursor: pointer;
 }
 
 .platform-card.is-available:hover,
 .platform-card.is-available:focus-visible,
-.platform-card.is-planned:hover {
+.platform-card.is-unavailable:hover {
   border-color: color-mix(in srgb, var(--accent) 70%, var(--border));
   box-shadow: 0 24px 58px rgba(19, 104, 255, 0.16);
   transform: translateY(-2px);
@@ -80,7 +78,7 @@
   transform: scale(1.015);
 }
 
-.platform-card.is-planned .platform-card-hover {
+.platform-card.is-unavailable .platform-card-hover {
   background:
     radial-gradient(circle at 18% 76%, rgba(255, 255, 255, 0.14), transparent 34%),
     linear-gradient(135deg, #7c8798 0%, #5e6675 58%, #737b8a 100%);
@@ -109,22 +107,7 @@
   display: none;
 }
 
-.platform-current-badge {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  min-height: 26px;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  color: var(--accent);
-  background: var(--accent-soft);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.platform-planned-badge {
+.platform-status-badge {
   position: absolute;
   top: 18px;
   right: 18px;
@@ -144,14 +127,6 @@
   height: 88px;
   display: block;
   object-fit: contain;
-}
-
-.platform-logo-ios {
-  width: 124px;
-}
-
-.platform-logo-android {
-  width: 130px;
 }
 
 .platform-card h2 {
