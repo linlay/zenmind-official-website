@@ -1,5 +1,5 @@
 export { siteUrl } from './site';
-export { externalLinks, githubUrl } from './links';
+export { externalLinks, githubUrl, marketLinks } from './links';
 export { routeMap } from './routes';
 export { desktopInstallerPlatforms, desktopInstallers } from './installers';
 

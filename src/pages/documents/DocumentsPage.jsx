@@ -21,7 +21,7 @@ function DocSection({ section, copy }) {
             </div>
             <h2>{card.title}</h2>
             <p>{card.body}</p>
-            <CardActionLink href={card.href}>
+            <CardActionLink external={card.external} href={card.href}>
               {copy.documents.actionLabel}
               <Icon type="arrow" />
             </CardActionLink>

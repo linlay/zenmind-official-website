@@ -72,7 +72,6 @@ WEBSITE_PORT=8081 docker compose up --build
 - `/download`
 - `/documents`
 - `/news`
-- `/market`
 - `/login`
 
 English:
@@ -81,8 +80,12 @@ English:
 - `/en/download`
 - `/en/documents`
 - `/en/news`
-- `/en/market`
 - `/en/login`
+
+市场入口由官网 Nginx 挂载到独立市场站：
+
+- `/market/`
+- `/market/?lang=en`
 
 ## 4. 内容与数据维护
 

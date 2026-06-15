@@ -1,4 +1,4 @@
-import { externalLinks } from './links';
+import { externalLinks, marketLinks } from './links';
 import { siteUrl } from './site';
 
 export const en = {
@@ -209,7 +209,8 @@ export const en = {
               body: 'Review how skills, sandboxes, plugins, model providers, and workflow templates are presented publicly.',
               audience: 'Extension developers',
               status: 'preview',
-              href: '/en/market',
+              href: marketLinks.en,
+              external: true,
             },
           ],
         },
@@ -310,62 +311,6 @@ export const en = {
           body: 'Desktop and local runtimes support privacy, low latency, tool execution, and local file workflows.',
           href: externalLinks.nvidiaAiNews,
           source: 'NVIDIA News',
-        },
-      ],
-    },
-    market: {
-      eyebrow: 'Market',
-      title: 'Capability market',
-      intro:
-        'The ZenMind market starts with capability categories: skills, sandboxes, plugins, model providers, and workflow templates. Each item carries task tags; this page does not install capabilities yet.',
-      sectionLabel: 'Capability categories',
-      taskLabel: 'Tasks',
-      actionLabel: 'View details',
-      categories: [
-        {
-          key: 'skills',
-          title: 'Skills',
-          status: 'preview',
-          body: 'Capability packages for documents, sheets, PDFs, slides, and development tasks that can enter agent context on demand.',
-          taskTags: ['Documents', 'Data', 'Development'],
-          items: ['Office automation', 'Project instructions', 'Long-document processing'],
-          href: '/en/documents',
-        },
-        {
-          key: 'sandboxes',
-          title: 'Sandboxes',
-          status: 'soon',
-          body: 'Isolated environment templates for long-running tasks and tool execution through the local Container Hub.',
-          taskTags: ['Local runtime', 'Automation', 'Isolated execution'],
-          items: ['Container runtimes', 'Session templates', 'Resource boundaries'],
-          href: externalLinks.architecture,
-        },
-        {
-          key: 'plugins',
-          title: 'Plugins',
-          status: 'soon',
-          body: 'Extensions for Desktop, Web Client, or Agent Platform surfaces: tools, panels, and workflow entry points.',
-          taskTags: ['Workflows', 'Third-party tools', 'Service panels'],
-          items: ['Service panels', 'Workflow shortcuts', 'Third-party tool bridges'],
-          href: '/en/documents',
-        },
-        {
-          key: 'models',
-          title: 'Models / Providers',
-          status: 'preview',
-          body: 'Organize providers, model capabilities, usage accounting, and routing preferences in a maintainable registry.',
-          taskTags: ['Model calls', 'Usage', 'Provider'],
-          items: ['DeepSeek', 'Qwen / Bailian', 'MiniMax / MiMo'],
-          href: externalLinks.models,
-        },
-        {
-          key: 'workflows',
-          title: 'Workflow templates',
-          status: 'soon',
-          body: 'Reusable task templates for document analysis, code review, data cleanup, and automation operations.',
-          taskTags: ['Templates', 'Automation', 'Team workflows'],
-          items: ['Document analysis', 'Code review', 'Data cleanup'],
-          href: '/en/documents',
         },
       ],
     },

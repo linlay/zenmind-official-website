@@ -2,21 +2,19 @@ import { HomePage } from '../pages/home/HomePage';
 import { DownloadPage } from '../pages/download/DownloadPage';
 import { DocumentsPage } from '../pages/documents/DocumentsPage';
 import { NewsPage } from '../pages/news/NewsPage';
-import { MarketPage } from '../pages/market/MarketPage';
 import { LoginPage } from '../pages/login/LoginPage';
 import { AdminLoginPage } from '../pages/admin-login/AdminLoginPage';
 import { ProfilePage } from '../pages/profile/ProfilePage';
 import { AdminPage } from '../pages/admin/AdminPage';
 import { AuthFailurePage } from '../pages/auth-failure/AuthFailurePage';
 
-export const pageOrder = ['home', 'documents', 'news', 'market', 'download'];
+export const pageOrder = ['home', 'documents', 'news', 'download'];
 
 export const routeOrder = [
   'home',
   'download',
   'documents',
   'news',
-  'market',
   'login',
   'profile',
   'adminLogin',
@@ -30,7 +28,6 @@ export function getPageElement({ lang, pageKey, auth }) {
     download: <DownloadPage lang={lang} />,
     documents: <DocumentsPage lang={lang} />,
     news: <NewsPage lang={lang} />,
-    market: <MarketPage lang={lang} />,
     login: <LoginPage lang={lang} auth={auth} />,
     profile: <ProfilePage lang={lang} auth={auth} />,
     adminLogin: <AdminLoginPage lang={lang} auth={auth} />,

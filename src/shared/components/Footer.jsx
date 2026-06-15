@@ -1,7 +1,7 @@
 import { externalLinks, languages } from '../../content';
-import { pathFor } from '../routing';
+import { marketHrefFor, pathFor } from '../routing';
 
-const footerSiteLinks = ['documents', 'download', 'news', 'market'];
+const footerSiteLinks = ['documents', 'download', 'news'];
 
 export function Footer({ lang }) {
   const copy = languages[lang];
@@ -10,6 +10,11 @@ export function Footer({ lang }) {
       href: pathFor(lang, key),
       label: copy.nav[key],
     })),
+    {
+      href: marketHrefFor(lang),
+      label: copy.nav.market,
+      external: true,
+    },
     {
       href: externalLinks.github,
       label: copy.nav.github,

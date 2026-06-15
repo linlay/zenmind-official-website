@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { githubUrl, languages } from '../../content';
-import { alternatePath, pathFor } from '../routing';
+import { alternatePath, marketHrefFor, pathFor } from '../routing';
 import { AccountMenu } from './AccountMenu';
 import { Icon } from './Icon';
 import { ThemeSegment } from './ThemeSegment';
 
-const pageOrder = ['home', 'documents', 'news', 'market', 'download'];
+const navOrder = ['home', 'documents', 'news', 'market', 'download'];
 
 export function Header({ lang, pageKey, theme, auth }) {
   const copy = languages[lang];
@@ -25,16 +25,22 @@ export function Header({ lang, pageKey, theme, auth }) {
       </NavLink>
 
       <nav className="site-nav" aria-label="Primary navigation">
-        {pageOrder.map((key) => (
-          <NavLink
-            key={key}
-            className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`}
-            end={key === 'home'}
-            to={pathFor(lang, key)}
-          >
-            {copy.nav[key]}
-          </NavLink>
-        ))}
+        {navOrder.map((key) =>
+          key === 'market' ? (
+            <a className="nav-link" href={marketHrefFor(lang)} key={key} rel="noreferrer" target="_blank">
+              {copy.nav[key]}
+            </a>
+          ) : (
+            <NavLink
+              key={key}
+              className={({ isActive }) => `nav-link${isActive ? ' is-active' : ''}`}
+              end={key === 'home'}
+              to={pathFor(lang, key)}
+            >
+              {copy.nav[key]}
+            </NavLink>
+          ),
+        )}
       </nav>
 
       <div className="header-actions">
@@ -56,16 +62,29 @@ export function Header({ lang, pageKey, theme, auth }) {
       </div>
 
       <div className={`mobile-nav${menuOpen ? ' is-open' : ''}`} id="mobile-menu" hidden={!menuOpen}>
-        {pageOrder.map((key) => (
-          <NavLink
-            key={key}
-            className={({ isActive }) => `mobile-link${isActive ? ' is-active' : ''}`}
-            end={key === 'home'}
-            to={pathFor(lang, key)}
-          >
-            {copy.nav[key]}
-          </NavLink>
-        ))}
+        {navOrder.map((key) =>
+          key === 'market' ? (
+            <a
+              className="mobile-link"
+              href={marketHrefFor(lang)}
+              key={key}
+              onClick={() => setMenuOpen(false)}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {copy.nav[key]}
+            </a>
+          ) : (
+            <NavLink
+              key={key}
+              className={({ isActive }) => `mobile-link${isActive ? ' is-active' : ''}`}
+              end={key === 'home'}
+              to={pathFor(lang, key)}
+            >
+              {copy.nav[key]}
+            </NavLink>
+          ),
+        )}
         {auth.user ? (
           <>
             <a

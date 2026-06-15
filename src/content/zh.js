@@ -1,4 +1,4 @@
-import { externalLinks } from './links';
+import { externalLinks, marketLinks } from './links';
 import { siteUrl } from './site';
 
 export const zh = {
@@ -208,7 +208,8 @@ export const zh = {
               body: '查看技能、沙箱、插件、模型 Provider 和工作流模板的公开展示方式。',
               audience: '扩展开发者',
               status: 'preview',
-              href: '/market',
+              href: marketLinks.zh,
+              external: true,
             },
           ],
         },
@@ -308,61 +309,6 @@ export const zh = {
           body: '桌面端和本地运行时能承接隐私、低延迟、工具执行和本地文件场景。',
           href: externalLinks.nvidiaAiNews,
           source: 'NVIDIA News',
-        },
-      ],
-    },
-    market: {
-      eyebrow: 'Market',
-      title: '功能市场',
-      intro: 'ZenMind 市场先按能力类型展示：技能、沙箱、插件、模型 Provider 和工作流模板。每个能力标注适用任务，当前不执行在线安装。',
-      sectionLabel: '能力分类',
-      taskLabel: '适用任务',
-      actionLabel: '查看说明',
-      categories: [
-        {
-          key: 'skills',
-          title: '技能',
-          status: 'preview',
-          body: '面向文档、表格、PDF、PPT 与开发任务的能力包，按需进入 Agent 上下文。',
-          taskTags: ['文档', '数据', '开发'],
-          items: ['Office 自动化', '项目说明加载', '长文档处理'],
-          href: '/documents',
-        },
-        {
-          key: 'sandboxes',
-          title: '沙箱',
-          status: 'soon',
-          body: '为长期任务和工具执行准备隔离环境模板，服务本地 agent-container-hub。',
-          taskTags: ['本地运行时', '自动化', '隔离执行'],
-          items: ['容器工具运行时', '会话模板', '资源边界'],
-          href: externalLinks.architecture,
-        },
-        {
-          key: 'plugins',
-          title: '插件',
-          status: 'soon',
-          body: '扩展 Desktop、Web Client 或 Agent Platform 的工具、面板与工作流入口。',
-          taskTags: ['工作流', '第三方工具', '服务面板'],
-          items: ['服务面板', '快捷工作流', '第三方工具桥接'],
-          href: '/documents',
-        },
-        {
-          key: 'models',
-          title: '模型 / Provider',
-          status: 'preview',
-          body: '把不同模型供应商、模型能力、计费用量和调用偏好组织成可维护的 registry。',
-          taskTags: ['模型调用', '用量统计', 'Provider'],
-          items: ['DeepSeek', 'Qwen / Bailian', 'MiniMax / MiMo'],
-          href: externalLinks.models,
-        },
-        {
-          key: 'workflows',
-          title: '工作流模板',
-          status: 'soon',
-          body: '把常见任务沉淀为可复用模板，例如文档分析、代码审查、数据整理和自动化运维。',
-          taskTags: ['模板', '自动化', '团队协作'],
-          items: ['文档分析', '代码审查', '数据整理'],
-          href: '/documents',
         },
       ],
     },
