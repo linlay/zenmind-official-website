@@ -49,6 +49,8 @@ npm run build
 
 登录页默认通过 `VITE_API_BASE=/api` 调用后端。容器部署时，项目内的 nginx 会把普通 `/api` 代理到共享 Docker 网络里的 `zenmind-official-server:8080`，并只对 `/api/auth/sso/session` 启用 authentik forward auth。
 
+生产 canonical host 是 `www.zenmind.cc`。裸域 `zenmind.cc` 只作为入口保留，nginx 会用 `308` 跳转到 `https://www.zenmind.cc$request_uri`，确保 SSO 只匹配 authentik 的 `https://www.zenmind.cc` Provider。
+
 ### 容器部署
 
 官网容器使用项目内 `compose.yml` 部署。它会加入外部专用网络 `zenmind-official-net`，需要先创建一次：
