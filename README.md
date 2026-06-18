@@ -12,7 +12,7 @@ ZenMind 官网前端仓库，用于构建并发布 `www.zenmind.cc` 的双语官
 - 中英文双语路由
 - 文档、新闻、市场页面
 - GitHub 与官方 deploy 入口引导
-- `/login` 账号密码登录 UI
+- `/login` 统一认证入口 UI
 
 不负责的内容：
 
@@ -47,7 +47,7 @@ npm run build
 
 构建产物输出到 `dist/`。
 
-登录页默认通过 `VITE_API_BASE=/api` 调用后端。容器部署时，项目内的 nginx 会把 `/api` 代理到共享 Docker 网络里的 `zenmind-official-server:8080`。
+登录页默认通过 `VITE_API_BASE=/api` 调用后端。容器部署时，项目内的 nginx 会把普通 `/api` 代理到共享 Docker 网络里的 `zenmind-official-server:8080`，并只对 `/api/auth/sso/session` 启用 authentik forward auth。
 
 ### 容器部署
 
@@ -62,6 +62,12 @@ docker compose up --build
 
 ```bash
 WEBSITE_PORT=8081 docker compose up --build
+```
+
+生产部署需要设置 `SSO_BRIDGE_TOKEN`，并与后端服务的同名变量保持一致。如果 authentik outpost 不在默认的 `http://authentik-server:9000`，通过 `AUTHENTIK_OUTPOST_UPSTREAM` 覆盖：
+
+```bash
+SSO_BRIDGE_TOKEN=<shared-secret> AUTHENTIK_OUTPOST_UPSTREAM=http://authentik-server:9000 docker compose up --build
 ```
 
 ## 3. 当前路由

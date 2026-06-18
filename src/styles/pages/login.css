@@ -90,6 +90,17 @@
   background: var(--border);
 }
 
+.sso-login-note {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .signed-in-panel dl {
   margin: 0;
   display: grid;

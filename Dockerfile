@@ -15,7 +15,10 @@ RUN npm run build
 
 FROM nginx:1.29-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV AUTHENTIK_OUTPOST_UPSTREAM=http://authentik-server:9000
+ENV SSO_BRIDGE_TOKEN=
+
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 COPY --from=build /src/dist /usr/share/nginx/html
 
 EXPOSE 80
