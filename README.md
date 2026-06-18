@@ -47,7 +47,7 @@ npm run build
 
 构建产物输出到 `dist/`。
 
-登录页默认通过 `VITE_API_BASE=/api` 调用后端。容器部署时，项目内的 nginx 会把普通 `/api` 代理到共享 Docker 网络里的 `zenmind-official-server:8080`，并只对 `/api/auth/sso/session` 启用 authentik forward auth。
+登录页默认通过 `VITE_API_BASE=/api` 调用后端。容器部署时，项目内的 nginx 会把普通 `/api` 代理到共享 Docker 网络里的 `zenmind-official-server:8080`，并只对 `/api/auth/sso/session` 和 `/api/auth/desktop-sso/start` 启用 authentik forward auth。
 
 生产 canonical host 是 `www.zenmind.cc`。裸域 `zenmind.cc` 只作为入口保留，nginx 会用 `308` 跳转到 `https://www.zenmind.cc$request_uri`，确保 SSO 只匹配 authentik 的 `https://www.zenmind.cc` Provider。
 
@@ -71,6 +71,8 @@ WEBSITE_PORT=8081 docker compose up --build
 ```bash
 SSO_BRIDGE_TOKEN=<shared-secret> AUTHENTIK_OUTPOST_UPSTREAM=http://authentik-server:9000 docker compose up --build
 ```
+
+生产 canonical host 与裸域跳转通过 `SITE_PUBLIC_SCHEME`、`SITE_CANONICAL_HOST`、`SITE_REDIRECT_HOST` 配置。
 
 ## 3. 当前路由
 

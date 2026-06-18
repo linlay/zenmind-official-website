@@ -1,1 +1,1 @@
-export const siteUrl = 'https://www.zenmind.cc';
+export const siteUrl = import.meta.env.VITE_SITE_URL || '';

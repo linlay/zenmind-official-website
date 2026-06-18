@@ -4,11 +4,15 @@ services:
       context: .
       args:
         VITE_API_BASE: ${VITE_API_BASE:-/api}
+        VITE_SITE_URL: ${VITE_SITE_URL:-}
     image: zenmind-official-website
     container_name: zenmind-official-website
     environment:
       AUTHENTIK_OUTPOST_UPSTREAM: ${AUTHENTIK_OUTPOST_UPSTREAM:-http://authentik-server:9000}
       SSO_BRIDGE_TOKEN: ${SSO_BRIDGE_TOKEN:?SSO bridge token required}
+      SITE_PUBLIC_SCHEME: ${SITE_PUBLIC_SCHEME:-https}
+      SITE_CANONICAL_HOST: ${SITE_CANONICAL_HOST:-localhost}
+      SITE_REDIRECT_HOST: ${SITE_REDIRECT_HOST:-}
     ports:
       - "${WEBSITE_PORT:-80}:80"
     networks:
